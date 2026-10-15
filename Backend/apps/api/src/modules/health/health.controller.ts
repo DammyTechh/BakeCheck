@@ -1,5 +1,6 @@
 import { Controller, Get, Inject, Res, VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { AppConfig, CONFIG_TOKEN } from '../../config/configuration';
 import { Public } from '../../common/decorators';
@@ -15,8 +16,27 @@ import { EmailService } from '../email/email.service';
  * Excluding them from the global prefix is not enough on its own — URI
  * versioning would still place them behind `/v1`, and an orchestrator's probe
  * should not have to track the API version.
+ *
+ * `@SkipThrottle()` is not a nicety: a platform health check polls on a fixed
+ * interval forever, so sooner or later it trips any rate limit, and from that
+ * moment every probe gets a 429. The platform reads that as an unhealthy
+ * instance and kills it — then kills the replacement, and the next one. On
+ * Render this showed up as a service that went Live, served 429 to the
+ * health check every 5 seconds, and was SIGTERMed in a loop, with every real
+ * request returning 502.
+ *
+ * Rate limiting protects scarce work. These two endpoints are the opposite:
+ * the liveness probe touches nothing at all, and readiness does one trivial
+ * query plus two cached checks.
+ *
+ * Every throttler has to be named explicitly. A bare `@SkipThrottle()` means
+ * `{ default: true }` and skips ONLY the throttler called `default` — the
+ * other three still apply, and `auth` at 10/min is the one that actually
+ * killed this: the eleventh health check in a minute got a 429, and every one
+ * after it. Adding a throttler in app.module.ts means adding it here too.
  */
 @ApiTags('Health')
+@SkipThrottle({ default: true, auth: true, analysis: true, upload: true })
 @Controller({ version: VERSION_NEUTRAL })
 export class HealthController {
   constructor(
