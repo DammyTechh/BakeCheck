@@ -1,0 +1,59 @@
+# Ruff configuration for the BreadGuard AI vision service.
+#
+# Run: python -m ruff check app tests
+#      python -m ruff format app tests
+
+target-version = "py312"
+line-length = 100
+
+[lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes — real bugs: unused imports, undefined names
+  "I",    # import sorting
+  "B",    # flake8-bugbear — likely mistakes
+  "UP",   # pyupgrade
+  "SIM",  # simplify
+  "RUF",  # ruff-specific
+  "ISC",  # implicit string concatenation
+]
+
+ignore = [
+  # FastAPI's dependency injection is expressed as `= Depends(...)` in the
+  # signature. That is the framework's documented pattern, not an accidental
+  # mutable default.
+  "B008",
+  # Implicit string concatenation inside a list is how the multi-line
+  # limitation strings are written. They are deliberate and readable.
+  "ISC001",
+  "ISC002",
+  "ISC003",
+  "ISC004",
+  # `zip(a, a[1:])` is clearer than itertools.pairwise for walking a colour
+  # ladder, and reads the same in both the Python and TypeScript versions.
+  "RUF007",
+  # `class X(str, Enum)` rather than `StrEnum`. StrEnum would work on 3.12,
+  # but these enums are serialised by Pydantic and compared by identity
+  # (`verdict is Verdict.UNUSABLE`) across the service boundary. The existing
+  # pattern is correct, tested, and changing it buys nothing.
+  "UP042",
+  # `×` in "at least 64×64 pixels" is a multiplication sign, which is what
+  # that message should contain. It is user-facing text, not an identifier.
+  "RUF001",
+]
+
+[lint.per-file-ignores]
+# conftest.py must set environment variables before importing app modules,
+# so its imports cannot all sit at the top of the file.
+"tests/conftest.py" = ["E402"]
+# Tests import fixtures from conftest by module name, which ruff's import
+# sorter wants to group differently than pytest's path handling allows.
+"tests/*" = ["I001"]
+
+[lint.isort]
+known-first-party = ["app"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

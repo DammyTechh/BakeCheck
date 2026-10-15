@@ -1,0 +1,34 @@
+# Keep the build context small and keep secrets out of it.
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/coverage
+.git
+.github
+*.log
+# A bare `.env` pattern matches the context ROOT only, so `apps/api/.env` —
+# which is where the development secrets actually live — was reaching the
+# build stage. Verified with `docker build --output type=local`: without the
+# `**/` forms, apps/api/.env lands in the image build. The negations must be
+# doubled up the same way, or .env.example gets excluded with the rest.
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+.storage
+.storage-test
+**/__pycache__
+**/*.pyc
+.venv
+**/.venv
+.pytest_cache
+services/ai/artifacts
+services/ai/data
+apps/web/.vercel
+docs
+*.md
+!README.md

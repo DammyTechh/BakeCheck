@@ -1,0 +1,114 @@
+.auth {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  background: var(--surface);
+}
+
+.auth-aside {
+  padding: var(--s6) var(--s5);
+  /* The pale teal is the logo's own colour at low saturation, so the panel
+     reads as BakeCheck rather than as a generic tinted sidebar. */
+  background: var(--teal-weak);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.auth-logo {
+  height: 32px;
+  width: auto;
+  align-self: flex-start;
+}
+
+.auth-art {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  align-self: center;
+  mix-blend-mode: multiply;
+}
+
+.auth-aside-title {
+  font-size: var(--t-title);
+  color: var(--ink);
+}
+
+.auth-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-steps li {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  font-size: var(--t-small);
+  color: #0a4257;
+  line-height: var(--lh-body);
+}
+
+.auth-step-icon {
+  color: var(--teal);
+  margin-top: 2px;
+}
+
+.auth-caveat {
+  margin-top: auto;
+  padding-top: var(--s4);
+  border-top: 1px solid rgba(7, 155, 175, 0.25);
+  font-size: var(--t-micro);
+  color: #2d6f7e;
+}
+
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s6) var(--s5);
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-title {
+  font-size: var(--t-display);
+}
+
+.auth-subtitle {
+  margin: var(--s2) 0 var(--s5);
+  color: var(--text-soft);
+}
+
+.auth-alt {
+  margin-top: var(--s4);
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  text-align: center;
+}
+
+
+@media (max-width: 860px) {
+  .auth {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .auth-aside {
+    padding: var(--s5) var(--s4);
+    gap: var(--s3);
+  }
+  /* On a phone the illustration and the steps push the form below the fold,
+     so the panel shrinks to its branding and its one caveat. */
+  .auth-art,
+  .auth-steps,
+  .auth-aside-title {
+    display: none;
+  }
+  .auth-caveat {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+  }
+}

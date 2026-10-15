@@ -1,0 +1,30 @@
+# BreadGuard AI — computer vision service
+#
+# Every version is pinned EXACTLY, not ranged. `pip install -r requirements.txt`
+# therefore reproduces the exact set the test suite was verified against, so a
+# fresh environment behaves identically to the one these tests passed in.
+#
+# Bump deliberately: change the version, reinstall, and run `python -m pytest`.
+#
+# Requires Python 3.12 or newer.
+
+# ── Web framework ────────────────────────────────────────────────────────────
+fastapi==0.143.0
+uvicorn[standard]==0.53.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+python-multipart==0.0.32
+
+# ── Vision and numerics ──────────────────────────────────────────────────────
+# headless: no GUI bindings, which keeps the container smaller and removes an
+# unnecessary dependency surface for a server workload.
+opencv-python-headless==4.14.0.94
+numpy==2.5.3
+Pillow==12.3.0
+
+# ── Baseline machine learning ────────────────────────────────────────────────
+# scikit-learn only. A neural network trained on the data volumes this system
+# will realistically have would be indefensible; see docs/ai-methodology.md.
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0

@@ -1,0 +1,189 @@
+{
+  "source_image": "IMG_1212.PNG",
+  "chart_bounds": {
+    "x": 0,
+    "y": 885,
+    "width": 1179,
+    "height": 786
+  },
+  "color_space": "sRGB",
+  "illuminant": "D65 (assumed; the illustration carries no colour profile)",
+  "validation_status": "ILLUSTRATIVE",
+  "provenance_note": "Colours were read from an AI-generated illustration of a bromate colour chart. They describe the picture, not a calibrated colorimetric standard, and establish no validated relationship between colour and bromate concentration in any sample matrix.",
+  "levels": [
+    {
+      "sort_order": 0,
+      "label": "No Bromate",
+      "concentration_value": 0.0,
+      "concentration_unit": "ppm",
+      "rgb": [
+        240,
+        240,
+        240
+      ],
+      "rgb_std": [
+        2.68,
+        2.58,
+        2.86
+      ],
+      "lab": [
+        94.7962,
+        -0.0,
+        0.0
+      ],
+      "lab_std": 0.9261,
+      "roi": {
+        "x": 143,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5900
+    },
+    {
+      "sort_order": 1,
+      "label": "Trace Amount",
+      "concentration_value": 0.1,
+      "concentration_unit": "ppm",
+      "rgb": [
+        212,
+        236,
+        244
+      ],
+      "rgb_std": [
+        6.53,
+        2.67,
+        1.74
+      ],
+      "lab": [
+        91.9168,
+        -6.2801,
+        -6.538
+      ],
+      "lab_std": 1.7863,
+      "roi": {
+        "x": 303,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5866
+    },
+    {
+      "sort_order": 2,
+      "label": "Low Level",
+      "concentration_value": 0.5,
+      "concentration_unit": "ppm",
+      "rgb": [
+        120,
+        207,
+        247
+      ],
+      "rgb_std": [
+        21.84,
+        7.23,
+        2.65
+      ],
+      "lab": [
+        79.2311,
+        -15.538,
+        -27.713
+      ],
+      "lab_std": 4.7178,
+      "roi": {
+        "x": 468,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5850
+    },
+    {
+      "sort_order": 3,
+      "label": "Moderate Level",
+      "concentration_value": 1.0,
+      "concentration_unit": "ppm",
+      "rgb": [
+        1,
+        132,
+        241
+      ],
+      "rgb_std": [
+        34.59,
+        13.53,
+        8.08
+      ],
+      "lab": [
+        54.9243,
+        10.9125,
+        -62.8354
+      ],
+      "lab_std": 6.8953,
+      "roi": {
+        "x": 633,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5851
+    },
+    {
+      "sort_order": 4,
+      "label": "High Level",
+      "concentration_value": 5.0,
+      "concentration_unit": "ppm",
+      "rgb": [
+        1,
+        38,
+        156
+      ],
+      "rgb_std": [
+        23.03,
+        23.67,
+        13.94
+      ],
+      "lab": [
+        22.9717,
+        38.6075,
+        -65.5359
+      ],
+      "lab_std": 11.1672,
+      "roi": {
+        "x": 798,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5850
+    },
+    {
+      "sort_order": 5,
+      "label": "Very High Level",
+      "concentration_value": 10.0,
+      "concentration_unit": "ppm",
+      "rgb": [
+        2,
+        5,
+        112
+      ],
+      "rgb_std": [
+        16.52,
+        22.47,
+        20.81
+      ],
+      "lab": [
+        11.2116,
+        40.7745,
+        -57.3255
+      ],
+      "lab_std": 6.9922,
+      "roi": {
+        "x": 968,
+        "y": 1247,
+        "width": 52,
+        "height": 125
+      },
+      "pixels_sampled": 5854
+    }
+  ]
+}

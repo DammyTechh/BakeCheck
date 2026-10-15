@@ -1,0 +1,52 @@
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+  padding: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.stat-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.stat-icon {
+  color: var(--teal);
+}
+
+.stat-label {
+  font-size: var(--t-small);
+  color: var(--text-soft);
+}
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.stat-note {
+  font-size: var(--t-micro);
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+.panel-link {
+  font-size: var(--t-small);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.panel-link:hover {
+  text-decoration: underline;
+}
+
+.btn-link {
+  color: inherit;
+  text-decoration: none;
+}

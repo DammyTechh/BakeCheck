@@ -1,0 +1,30 @@
+{
+  "name": "breadguard-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Laboratory-assisted chemical screening platform (prototype)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "//overrides": "Resolved from the workspace root ONLY (npm ignores overrides in workspace packages). Pinned exactly: these are the versions the whole test suite was verified against. qs<6.15.4 and multer<2 carry DoS advisories reachable from the Express request path; js-yaml<5.4.1 a CPU-exhaustion advisory via @nestjs/swagger.",
+  "overrides": {
+    "qs": "6.16.0",
+    "multer": "2.4.0",
+    "js-yaml": "5.4.3"
+  },
+  "scripts": {
+    "dev:api": "npm run start:dev --workspace @breadguard/api",
+    "build:api": "npm run build --workspace @breadguard/api",
+    "start:api": "npm run start:prod --workspace @breadguard/api",
+    "test:api": "npm run test --workspace @breadguard/api",
+    "lint:api": "npm run lint --workspace @breadguard/api",
+    "db:migrate": "npm run db:migrate --workspace @breadguard/api",
+    "db:migrate:status": "npm run db:migrate:status --workspace @breadguard/api",
+    "db:seed": "npm run db:seed --workspace @breadguard/api",
+    "db:reset": "npm run db:reset --workspace @breadguard/api"
+  },
+  "//versions": "Every version in this repo is pinned exactly, not ranged. npm install therefore reproduces the exact tree that was tested, with or without the lockfile. Bump deliberately: change the version, reinstall, and re-run all three suites."
+}

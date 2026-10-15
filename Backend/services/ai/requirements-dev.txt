@@ -1,0 +1,26 @@
+# BreadGuard AI — development and test dependencies.
+#
+# Kept out of requirements.txt so the production container installs only what
+# it runs. A server image has no business shipping a test runner: it is extra
+# download on every build, extra bytes in the image, and extra surface for no
+# runtime benefit.
+#
+# Local development and CI:
+#     pip install -r requirements-dev.txt     (pulls in requirements.txt too)
+#
+# The container:
+#     pip install -r requirements.txt         (runtime only)
+
+-r requirements.txt
+
+# ── Testing ──────────────────────────────────────────────────────────────────
+pytest==8.4.2
+pytest-asyncio==0.26.0
+# httpx backs FastAPI's TestClient.
+httpx==0.28.1
+
+# ── Static analysis ──────────────────────────────────────────────────────────
+# Pinned so `verify-all.sh` is reproducible rather than depending on whatever
+# happens to be installed on the machine running it.
+ruff==0.17.0
+mypy==2.4.0

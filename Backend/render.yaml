@@ -1,0 +1,202 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BreadGuard AI — Render blueprint
+#
+# Deploys the backend: the public Node API and the internal Python vision
+# service. The React frontend goes to Vercel separately (see
+# docs/deployment.md).
+#
+#   1. Push this repository to GitHub.
+#   2. Render → New → Blueprint → select the repository.
+#   3. Fill in the variables marked `sync: false` when prompted.
+#   4. After the first deploy, run the migration job.
+#
+# WHY NOT VERCEL FOR THE BACKEND
+#
+#   The Node API could run on Vercel, but the Python service cannot:
+#   OpenCV plus NumPy and scikit-learn exceeds the serverless bundle limit,
+#   image analysis is CPU-bound and runs for seconds rather than milliseconds,
+#   and a cold start would reload the model on every invocation. Splitting the
+#   two across providers would also put a public internet hop between them.
+#   Both run here instead.
+# ─────────────────────────────────────────────────────────────────────────────
+
+databases:
+  - name: breadguard-postgres
+    databaseName: breadguard
+    user: breadguard
+    plan: basic-256mb
+    postgresMajorVersion: '16'
+    ipAllowList: []          # private network only; no public access
+
+services:
+  # ── Internal vision service ────────────────────────────────────────────────
+  # `type: pserv` is a private service: reachable from other services in this
+  # Render project, never from the internet. That is the primary control; the
+  # shared internal key is defence in depth.
+  - type: pserv
+    name: breadguard-ai-service
+    runtime: docker
+    plan: standard            # OpenCV needs the memory; starter is too small
+    dockerfilePath: ./services/ai/Dockerfile
+    dockerContext: .
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_PORT
+        value: '8000'
+      - key: AI_DOCS_ENABLED
+        # Closed in production: these docs describe internal admin routes.
+        value: 'false'
+      - key: AI_ARTIFACT_DIR
+        value: /app/artifacts
+      - key: AI_MAX_CONCURRENCY
+        value: '4'
+      - key: AI_ANALYSIS_TIMEOUT
+        value: '25'
+      - key: AI_INTERNAL_KEY
+        # Generated once by Render and shared with the API below, so the two
+        # always agree without the secret being written down anywhere.
+        generateValue: true
+    disk:
+      name: ai-artifacts
+      mountPath: /app/artifacts
+      sizeGB: 1
+
+  # ── Public API ─────────────────────────────────────────────────────────────
+  - type: web
+    name: breadguard-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    region: frankfurt          # same region as the database and AI service
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: API_PORT
+        value: '3000'
+
+      # Behind Render's load balancer, so X-Forwarded-For is trustworthy and
+      # rate limiting must use it rather than the proxy's own address.
+      - key: TRUST_PROXY
+        value: 'true'
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: breadguard-postgres
+          property: connectionString
+      - key: DATABASE_SSL
+        value: 'true'
+
+      # Distinct secrets: an identical pair would let a refresh token be
+      # replayed as an access token.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_TTL
+        value: '900'
+      - key: JWT_REFRESH_TTL
+        value: '1209600'
+
+      # Cross-site cookie: the frontend is on a different origin (Vercel), so
+      # SameSite=none is required — and SameSite=none requires Secure.
+      - key: COOKIE_SECURE
+        value: 'true'
+      - key: COOKIE_SAMESITE
+        value: 'none'
+      - key: REFRESH_COOKIE_DOMAIN
+        sync: false            # set to your apex domain, or leave blank
+
+      # The exact frontend origin. No wildcards — the config refuses them in
+      # production, because credentials: true plus a wildcard is unsafe.
+      - key: CORS_ORIGINS
+        sync: false            # e.g. https://breadguard.vercel.app
+      - key: APP_BASE_URL
+        sync: false            # same origin as above
+
+      - key: AI_SERVICE_URL
+        fromService:
+          type: pserv
+          name: breadguard-ai-service
+          property: hostport
+      - key: AI_SERVICE_INTERNAL_KEY
+        fromService:
+          type: pserv
+          name: breadguard-ai-service
+          envVarKey: AI_INTERNAL_KEY
+      - key: AI_SERVICE_TIMEOUT_MS
+        value: '30000'
+      - key: AI_SERVICE_MAX_CONCURRENCY
+        value: '4'
+
+      # Render's filesystem is ephemeral — a redeploy destroys it. Uploaded
+      # images must go to object storage, so the Supabase driver is required.
+      - key: STORAGE_DRIVER
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false            # backend only; never ships to the browser
+      - key: SUPABASE_STORAGE_BUCKET
+        value: sample-images
+      - key: SIGNED_URL_TTL_SECONDS
+        value: '300'
+
+      - key: MAX_UPLOAD_BYTES
+        value: '10485760'
+      - key: RATE_LIMIT_MAX
+        value: '120'
+      - key: AUTH_RATE_LIMIT_MAX
+        value: '10'
+      - key: ANALYSIS_RATE_LIMIT_MAX
+        value: '20'
+
+      # Optional. Absent credentials disable delivery cleanly; the API keeps
+      # working and reports email as disabled rather than faking a send.
+      - key: EMAIL_DRIVER
+        value: noop            # change to `resend` once a key is configured
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+      # Off by default. Turn on only behind authentication at the ingress.
+      - key: SWAGGER_ENABLED
+        value: 'false'
+
+  # ── Migration job ──────────────────────────────────────────────────────────
+  # Run manually from the Render dashboard after a deploy that adds
+  # migrations. Deliberately not part of the API's start command: an
+  # application that migrates on boot races itself as soon as it has more than
+  # one replica.
+  - type: cron
+    name: breadguard-migrate
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    region: frankfurt
+    branch: main
+    # 31 February never occurs, so this never fires on its own. The job exists
+    # to be triggered by hand.
+    schedule: '0 0 31 2 *'
+    dockerCommand: node dist/database/cli/migrate.js up
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: breadguard-postgres
+          property: connectionString
+      - key: DATABASE_SSL
+        value: 'true'

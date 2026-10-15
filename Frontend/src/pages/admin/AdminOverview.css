@@ -1,0 +1,75 @@
+.readiness-lead {
+  font-size: var(--t-body);
+  color: var(--text-soft);
+  margin-bottom: var(--s3);
+}
+
+/* A plain bar, not a gauge or a ring: it answers one question — how far from
+   the minimum — and nothing else. */
+.meter {
+  height: 6px;
+  background: var(--info-weak);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  background: var(--teal);
+  border-radius: var(--r-pill);
+  transition: width 240ms ease;
+}
+
+.readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--s4);
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--border);
+  margin-bottom: var(--s4);
+}
+
+.metric {
+  display: flex;
+  gap: var(--s2);
+  align-items: flex-start;
+}
+
+.metric-icon {
+  color: var(--teal);
+  margin-top: 3px;
+  flex: none;
+}
+
+.metric-value {
+  display: block;
+  font-size: var(--t-title);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.metric-label {
+  display: block;
+  font-size: var(--t-small);
+  color: var(--text-soft);
+}
+
+.metric-note {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--t-micro);
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+.checkline {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s3);
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  cursor: pointer;
+}

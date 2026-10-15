@@ -1,0 +1,188 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BreadGuard AI — local development
+#
+#   docker compose up -d                 # start everything
+#   docker compose run --rm migrate      # apply migrations
+#   docker compose run --rm seed         # create demonstration accounts
+#   docker compose logs -f api           # follow the API
+#
+# Network layout mirrors production: the AI service sits on an internal
+# network with no published port, so nothing outside the compose project can
+# reach it. The API is the only public entry point.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: breadguard
+
+services:
+  # ── Database ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-breadguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-breadguard}
+      # Deterministic collation, so ORDER BY behaves the same everywhere.
+      POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en-US'
+    ports:
+      # Published for psql and GUI clients on the host.
+      #
+      # 5433, not 5432, because 5432 is where a locally installed Postgres
+      # already listens on most developer machines, and the collision stops
+      # the whole stack with an error that does not say what to change:
+      #   Bind for 0.0.0.0:5432 failed: port is already allocated
+      # The containers reach each other on 5432 over the private network
+      # regardless, so this only ever affects host tooling.
+      #
+      # Bound to 127.0.0.1 rather than all interfaces: a development database
+      # with a known default password has no business being reachable from
+      # the rest of the network.
+      - '127.0.0.1:${POSTGRES_PORT:-5433}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [backend]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-breadguard} -d ${POSTGRES_DB:-breadguard}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── Internal vision service ────────────────────────────────────────────────
+  ai:
+    build:
+      context: .
+      dockerfile: services/ai/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      AI_PORT: 8000
+      AI_INTERNAL_KEY: ${AI_SERVICE_INTERNAL_KEY:?set AI_SERVICE_INTERNAL_KEY in .env}
+      AI_DOCS_ENABLED: ${AI_DOCS_ENABLED:-true}
+      AI_ARTIFACT_DIR: /app/artifacts
+      AI_MAX_CONCURRENCY: ${AI_SERVICE_MAX_CONCURRENCY:-4}
+    volumes:
+      - ai-artifacts:/app/artifacts
+    # No `ports:` on purpose. The service is reachable as http://ai:8000 from
+    # inside the compose network and from nowhere else. Publishing it would
+    # expose an unauthenticated-by-network internal service.
+    networks: [backend]
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=4).status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Public API ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      API_PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-breadguard}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-breadguard}
+      DATABASE_SSL: 'false'
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
+      AI_SERVICE_URL: http://ai:8000
+      AI_SERVICE_INTERNAL_KEY: ${AI_SERVICE_INTERNAL_KEY:?set AI_SERVICE_INTERNAL_KEY in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+      STORAGE_LOCAL_DIR: /app/.storage
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET:-sample-images}
+      EMAIL_DRIVER: ${EMAIL_DRIVER:-noop}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-BreadGuard AI <no-reply@example.test>}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:5173}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      TRUST_PROXY: 'false'
+    ports:
+      - '${API_PORT:-3000}:3000'
+    volumes:
+      - api-storage:/app/.storage
+    networks: [backend]
+    depends_on:
+      postgres: { condition: service_healthy }
+      ai: { condition: service_healthy }
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  # ── One-shot tasks ─────────────────────────────────────────────────────────
+  # Run with `docker compose run --rm migrate`. Kept out of the API's start
+  # command on purpose: an application that migrates on boot will race itself
+  # the moment it runs more than one replica.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-breadguard}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-breadguard}
+      DATABASE_SSL: 'false'
+    networks: [backend]
+    depends_on:
+      postgres: { condition: service_healthy }
+    profiles: [tools]
+    working_dir: /app/apps/api
+    command: ['node', 'dist/database/cli/migrate.js', 'up']
+
+  seed:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      # Never 'production': the seed script refuses to create demonstration
+      # accounts in a production environment.
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-breadguard}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-breadguard}
+      DATABASE_SSL: 'false'
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_TECHNICIAN_PASSWORD: ${SEED_TECHNICIAN_PASSWORD:-}
+      SEED_REVIEWER_PASSWORD: ${SEED_REVIEWER_PASSWORD:-}
+    networks: [backend]
+    depends_on:
+      postgres: { condition: service_healthy }
+    profiles: [tools]
+    working_dir: /app/apps/api
+    command: ['node', 'dist/database/cli/seed.js']
+
+  # `docker compose run --rm training-demo` seeds SYNTHETIC examples so the
+  # learning loop can be watched before a laboratory has produced real
+  # measurements. It writes rows into laboratory_measurements that are NOT
+  # measurements — every one stamped SYNTHETIC_DEMONSTRATION and removable
+  # with `run --rm training-demo --purge`. The script itself refuses to run
+  # with NODE_ENV=production.
+  training-demo:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-breadguard}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-breadguard}
+      DATABASE_SSL: 'false'
+    networks: [backend]
+    depends_on:
+      postgres: { condition: service_healthy }
+    profiles: [tools]
+    working_dir: /app/apps/api
+    entrypoint: ['/usr/bin/tini', '--', 'node', 'dist/database/cli/seed-training-demo.js']
+    command: []
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  api-storage:
+  ai-artifacts:

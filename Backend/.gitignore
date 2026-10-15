@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+.next/
+.vercel
+.turbo/
+
+# Environment / secrets  (NEVER commit real credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/public.key
+service-account*.json
+
+# Test / coverage
+coverage/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.nyc_output/
+junit.xml
+
+# Model artifacts & datasets (tracked in object storage, not git)
+services/ai/artifacts/
+services/ai/data/
+!services/ai/artifacts/.gitkeep
+!services/ai/data/.gitkeep
+
+# Local uploads / temp
+# .storage is the local storage driver's directory — uploaded laboratory
+# images land here during development and must never be committed.
+.storage/
+**/.storage/
+.storage-test/
+**/.storage-test/
+uploads/
+tmp/
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Vercel build output and local link
+apps/web/dist/
+.vercel

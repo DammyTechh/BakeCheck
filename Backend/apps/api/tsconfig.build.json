@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Production build contains src/ only, so the compiled entrypoint lands at
+    // dist/main.js (what `npm run start:prod` executes).
+    "rootDir": "./src",
+    "incremental": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts", "**/*.e2e-spec.ts"]
+}
