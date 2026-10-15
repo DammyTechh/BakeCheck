@@ -1,6 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BreadGuard AI — Render blueprint
 #
+# THIS COPY IS FOR A REPOSITORY WHERE THE BACKEND LIVES IN  Backend/
+#
+#   Render resolves `dockerfilePath` and `dockerContext` from the REPOSITORY
+#   ROOT, not from the folder render.yaml sits in. So with the backend under
+#   Backend/, every path below carries that prefix and the build context is
+#   ./Backend — which is what the Dockerfiles expect, since they COPY
+#   `apps/api` and `services/ai` relative to the backend root.
+#
+#   If you later move the backend to its own repository, drop the Backend/
+#   prefixes and set dockerContext back to `.`
+#
 # Deploys the backend: the public Node API and the internal Python vision
 # service. The React frontend goes to Vercel separately (see
 # docs/deployment.md).
@@ -26,6 +37,7 @@ databases:
     user: breadguard
     plan: basic-256mb
     postgresMajorVersion: '16'
+    region: frankfurt        # same region as the services, for private networking
     ipAllowList: []          # private network only; no public access
 
 services:
@@ -37,12 +49,14 @@ services:
     name: breadguard-ai-service
     runtime: docker
     plan: standard            # OpenCV needs the memory; starter is too small
-    dockerfilePath: ./services/ai/Dockerfile
-    dockerContext: .
+    dockerfilePath: ./Backend/services/ai/Dockerfile
+    dockerContext: ./Backend
     region: frankfurt
     branch: main
     autoDeploy: true
-    healthCheckPath: /health
+    # No healthCheckPath: Render rejects it on a `pserv`, which has no public
+    # endpoint for the platform to poll. The container's own HEALTHCHECK still
+    # runs, and the API reports the service's health through /health/ready.
     envVars:
       - key: NODE_ENV
         value: production
@@ -71,8 +85,8 @@ services:
     name: breadguard-api
     runtime: docker
     plan: starter
-    dockerfilePath: ./apps/api/Dockerfile
-    dockerContext: .
+    dockerfilePath: ./Backend/apps/api/Dockerfile
+    dockerContext: ./Backend
     region: frankfurt          # same region as the database and AI service
     branch: main
     autoDeploy: true
@@ -125,10 +139,12 @@ services:
         sync: false            # same origin as above
 
       - key: AI_SERVICE_URL
-        fromService:
-          type: pserv
-          name: breadguard-ai-service
-          property: hostport
+        # Written out rather than taken from `fromService ... property:
+        # hostport`, which yields "breadguard-ai-service:8000" with no scheme.
+        # The API calls fetch(`${url}/health`), and fetch rejects a URL with no
+        # scheme — so the AI service would have been unreachable from the first
+        # request, with the config schema failing it at boot at best.
+        value: http://breadguard-ai-service:8000
       - key: AI_SERVICE_INTERNAL_KEY
         fromService:
           type: pserv
@@ -183,8 +199,8 @@ services:
     name: breadguard-migrate
     runtime: docker
     plan: starter
-    dockerfilePath: ./apps/api/Dockerfile
-    dockerContext: .
+    dockerfilePath: ./Backend/apps/api/Dockerfile
+    dockerContext: ./Backend
     region: frankfurt
     branch: main
     # 31 February never occurs, so this never fires on its own. The job exists
