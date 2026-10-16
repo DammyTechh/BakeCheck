@@ -30,12 +30,12 @@ from app.reference_matching.matcher import ReferenceLevel
 # infrastructure/scripts/extract_reference_colors.py. Reused here so the tests
 # exercise the same values the application actually ships with.
 BROMATE_LADDER_RGB: list[tuple[str, float, tuple[int, int, int]]] = [
-    ("No Bromate", 0.0, (240, 240, 240)),
-    ("Trace Amount", 0.1, (212, 236, 244)),
-    ("Low Level", 0.5, (120, 207, 247)),
-    ("Moderate Level", 1.0, (1, 132, 241)),
-    ("High Level", 5.0, (1, 38, 156)),
-    ("Very High Level", 10.0, (2, 5, 112)),
+    ("Chart patch 1 — near-white", 0.0, (240, 240, 240)),
+    ("Chart patch 2 — pale blue", 0.1, (212, 236, 244)),
+    ("Chart patch 3 — light blue", 0.5, (120, 207, 247)),
+    ("Chart patch 4 — mid blue", 1.0, (1, 132, 241)),
+    ("Chart patch 5 — deep blue", 5.0, (1, 38, 156)),
+    ("Chart patch 6 — darkest blue", 10.0, (2, 5, 112)),
 ]
 
 

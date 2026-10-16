@@ -1,8 +1,20 @@
+# Dependencies and build output
 node_modules/
 dist/
-.vercel
+*.tsbuildinfo
+
+# Local environment.
+#
+# This matters more than it looks: Vite bakes VITE_* values into the bundle at
+# BUILD time, and a committed .env.local wins over the variable set in the
+# Vercel dashboard. A local file pointing at 127.0.0.1 therefore produces a
+# deployed site that calls the developer's own machine. Keep these untracked.
 .env
 .env.*
 !.env.example
-*.log
+
+# Editor / OS
 .DS_Store
+.idea/
+.vscode/
+*.log

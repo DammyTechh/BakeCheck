@@ -13,16 +13,27 @@ pass quality assessment and match a band.
 
 Measured on the seeded chart:
 
-| File | Nearest band | ΔE (CIEDE2000) | Quality |
+| File | Nearest patch | ΔE (CIEDE2000) | Quality |
 |---|---|---|---|
-| `tube-1.jpg` | High Level | 14.09 | USABLE (0.80) |
-| `tube-2.jpg` | High Level | 9.30 | USABLE (0.95) |
-| `tube-3.jpg` | Very High Level | 12.54 | USABLE (0.80) |
-| `tube-4.jpg` | Very High Level | 11.93 | USABLE (0.95) |
+| `tube-1.jpg` | Chart patch 5 — deep blue | 14.09 | USABLE (0.80) |
+| `tube-2.jpg` | Chart patch 5 — deep blue | 9.30 | USABLE (0.95) |
+| `tube-3.jpg` | Chart patch 6 — darkest blue | 12.54 | USABLE (0.80) |
+| `tube-4.jpg` | Chart patch 6 — darkest blue | 11.93 | USABLE (0.95) |
 
 Those ΔE values are large. A match at ΔE 9–14 means "this is the closest of
-the six bands", not "this is that band" — the colours sit between bands, or
-outside the range the chart covers.
+the six patches", not "this is that patch" — the colours sit between patches,
+or outside the range the chart covers.
+
+### These photographs are why the patches were renamed
+
+Patches 5 and 6 used to be called "High Level" and "Very High Level". The
+laboratory's ppm interpretation scale, supplied the following day, uses those
+same words for 200 and 250 ppm — while the chart had put them at 5 and 10 ppm.
+
+So all four of these tubes displayed as "High Level" or "Very High Level",
+which a reader holding that scale would take as 200–250 ppm, from patches the
+chart itself numbered at 5–10. See `docs/prototype-limitations.md` §1a. The
+patches now describe their colour, and carry no concentration figure at all.
 
 ## What these are NOT useful for
 

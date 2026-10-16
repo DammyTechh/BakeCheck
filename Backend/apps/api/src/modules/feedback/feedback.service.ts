@@ -4,6 +4,7 @@ import { ApiError, ErrorCode } from '../../common/errors/api-error';
 import { AuthenticatedUser } from '../../common/types/request-context';
 import { Permission, roleHasPermission, UserRole } from '../../common/types/roles';
 import { AuditAction, AuditService } from '../audit/audit.service';
+import { interpretConcentration } from '../reference-data/interpretation-scale';
 import {
   CreateFeedbackDto,
   CreateMeasurementDto,
@@ -434,6 +435,40 @@ export class FeedbackService {
   }
 
   private mapMeasurement(row: Record<string, unknown>): Record<string, unknown> {
+    const concentrationValue =
+      row.concentration_value !== null ? Number(row.concentration_value) : null;
+    const concentrationUnit = String(row.concentration_unit ?? '');
+
+    /**
+     * This is the only place in the system where the laboratory's ppm
+     * interpretation scale is applied, because it is the only place a
+     * concentration determined by a validated analytical method exists.
+     *
+     * Analyses do not get one. An image-derived result carries
+     * `estimatedConcentration: null`, and the scale has no colour in it —
+     * wording a colour match in the laboratory's own vocabulary would
+     * manufacture exactly the authority this system is built to withhold.
+     *
+     * Below the detection limit is left unworded on purpose: "Negative" is
+     * a different claim from "below the limit this method can detect", and
+     * only the second one is true.
+     */
+    const interpretation =
+      row.below_detection_limit === true
+        ? {
+            interpretation: null,
+            matchedConcentration: null,
+            exact: false,
+            bracket: null,
+            aboveScale: false,
+            caveats: [
+              'Reported as below the detection limit of the method. The ' +
+                'scale is not applied: that is a statement about the ' +
+                'method, not a concentration it can word.',
+            ],
+          }
+        : interpretConcentration(concentrationValue, concentrationUnit);
+
     return {
       id: row.id,
       sampleId: row.sample_id,
@@ -441,9 +476,10 @@ export class FeedbackService {
       analysisId: row.analysis_id,
       measurementMethod: row.measurement_method,
       instrument: row.instrument,
-      concentrationValue:
-        row.concentration_value !== null ? Number(row.concentration_value) : null,
+      concentrationValue,
       concentrationUnit: row.concentration_unit,
+      /** The laboratory's own wording for this concentration. */
+      interpretation,
       uncertainty: row.uncertainty !== null ? Number(row.uncertainty) : null,
       detectionLimit: row.detection_limit !== null ? Number(row.detection_limit) : null,
       belowDetectionLimit: row.below_detection_limit,

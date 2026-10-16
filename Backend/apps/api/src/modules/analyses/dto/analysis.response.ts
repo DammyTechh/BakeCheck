@@ -4,7 +4,7 @@ export class ReferenceCandidateResponse {
   @ApiProperty({ format: 'uuid' })
   referenceLevelId!: string;
 
-  @ApiProperty({ example: 'Low Level' })
+  @ApiProperty({ example: 'Chart patch 3 — light blue' })
   label!: string;
 
   @ApiPropertyOptional({ nullable: true, example: 0.5 })
@@ -84,7 +84,7 @@ export class AnalysisPredictionResponse {
 
   @ApiPropertyOptional({
     nullable: true,
-    example: 'Low Level',
+    example: 'Chart patch 3 — light blue',
     description: 'The closest reference level by perceptual colour distance.',
   })
   label!: string | null;

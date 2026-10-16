@@ -1,17 +1,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BreadGuard AI — Render blueprint
 #
-# THIS COPY IS FOR A REPOSITORY WHERE THE BACKEND LIVES IN  Backend/
-#
-#   Render resolves `dockerfilePath` and `dockerContext` from the REPOSITORY
-#   ROOT, not from the folder render.yaml sits in. So with the backend under
-#   Backend/, every path below carries that prefix and the build context is
-#   ./Backend — which is what the Dockerfiles expect, since they COPY
-#   `apps/api` and `services/ai` relative to the backend root.
-#
-#   If you later move the backend to its own repository, drop the Backend/
-#   prefixes and set dockerContext back to `.`
-#
 # Deploys the backend: the public Node API and the internal Python vision
 # service. The React frontend goes to Vercel separately (see
 # docs/deployment.md).
@@ -49,8 +38,8 @@ services:
     name: breadguard-ai-service
     runtime: docker
     plan: standard            # OpenCV needs the memory; starter is too small
-    dockerfilePath: ./Backend/services/ai/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./services/ai/Dockerfile
+    dockerContext: .
     region: frankfurt
     branch: main
     autoDeploy: true
@@ -85,8 +74,8 @@ services:
     name: breadguard-api
     runtime: docker
     plan: starter
-    dockerfilePath: ./Backend/apps/api/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
     region: frankfurt          # same region as the database and AI service
     branch: main
     autoDeploy: true
@@ -199,8 +188,8 @@ services:
     name: breadguard-migrate
     runtime: docker
     plan: starter
-    dockerfilePath: ./Backend/apps/api/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
     region: frankfurt
     branch: main
     # 31 February never occurs, so this never fires on its own. The job exists

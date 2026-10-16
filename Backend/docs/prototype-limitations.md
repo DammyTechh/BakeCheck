@@ -31,12 +31,83 @@ establishes:
 - ❌ no relationship valid for any particular sample matrix
 - ❌ no calibration, in any sense of the word
 
-The six labelled steps (0, 0.1, 0.5, 1, 5, 10 ppm) are **interface examples**.
-They demonstrate what a configured chart looks like. They are not a standard.
+The chart's six patches **carry no concentration figures at all**, and are
+named for their colour — "Chart patch 5 — deep blue" — rather than for a
+level. Both of those were changed on 16 October 2026, and the reason is worth
+reading before anyone presents a result.
 
 **What would fix this**: prepare standards of known concentration using your
 validated method, photograph or measure them under controlled conditions, and
 enter those values as a chart marked `VALIDATED`.
+
+---
+
+## 1a. The chart once used the laboratory's own words for the wrong numbers
+
+On 16 October 2026 the laboratory supplied its ppm interpretation scale:
+sixteen points from 0 ("Negative") to 1000 ("Extremely High"), with 200 =
+"High" and 250 = "Very High".
+
+The chart, built from the illustration, had been given figures of 0–10 ppm,
+and its patches were labelled "High Level" at 5 ppm and "Very High Level" at
+10 ppm.
+
+Put those side by side:
+
+| Patch | Chart said | The laboratory's word for that number | The laboratory's number for that word |
+|---|---|---|---|
+| 5 | High Level, 5 ppm | Negative | 200 ppm |
+| 6 | Very High Level, 10 ppm | Trace | 250 ppm |
+
+All four real laboratory photographs matched patch 5 or patch 6. So the
+screen read **"Very High Level"** for a tube that, on the laboratory's own
+scale, the chart's own number would have called **"Trace"** — and anyone
+reading that phrase against the scale they had just written would infer
+250 ppm. A 25× overstatement, in the laboratory's own vocabulary, from two
+pieces of data that were each individually labelled correctly.
+
+Nothing was mislabelled. `ILLUSTRATIVE` was on every level, and the API
+returned `estimatedConcentration: null` throughout. The failure was that two
+honest artefacts shared a vocabulary, and a reader joins them up.
+
+Two changes:
+
+1. **Patches are named for their colour.** The two vocabularies are now
+   disjoint, and `test/interpretation-scale.spec.ts` fails if a scale word
+   ever reappears as a patch word.
+2. **The chart's concentration figures were removed, not merely flagged.**
+   They came off an illustration, and the laboratory's working range reaches
+   1000 ppm against the chart's 10 — so they were not just unvalidated, they
+   were wrong by roughly two orders of magnitude. A wrong number is worse
+   than no number, and `concentration_value` is now `NULL` on every patch.
+   The Python matcher already skipped null-concentration levels when
+   interpolating, so this disables interpolation rather than breaking it.
+
+---
+
+## 1b. The interpretation scale is a vocabulary, not a calibration
+
+The scale is served at `GET /api/v1/reference-data/interpretation-scale` and
+shown on the analysis screen, greyed and marked **not applied**.
+
+It converts a concentration that has **already been determined** into the
+laboratory's wording for it. There is no colour anywhere in it, so it cannot
+be run backwards: no photograph, measured colour or ΔE yields a ppm value
+through this scale. Receiving it did not change what any analysis may report,
+and `estimatedConcentration` is still `null` on every image-derived result.
+
+It is applied in exactly one place: a `LABORATORY_MEASUREMENT` recorded
+against a sample by a validated analytical method, where it appears as
+`interpretation` on the measurement. Below-detection-limit measurements are
+left unworded — "Negative" and "below what this method can detect" are
+different claims, and only the second is true.
+
+**One rule is ours, not theirs.** The laboratory gave discrete points, not
+ranges, and did not say how to word 15 ppm. A value between two points takes
+the **highest point it reaches**, so 249 ppm reads as "High" and never rounds
+up into "Very High"; the response carries `exact: false`, the bracket, and a
+caveat saying the rule is unconfirmed. `bracketRuleConfirmedByLaboratory` is
+`false` until they confirm it in writing.
 
 ---
 

@@ -54,13 +54,25 @@ const PROVENANCE_WARNING =
  * trained here learns the same mapping the reference matcher computes — which
  * is exactly why it will not beat it.
  */
+/**
+ * Patches are named for their colour, not for a level.
+ *
+ * The earlier names ("High Level", "Very High Level") are the words the
+ * laboratory's own ppm reporting scale uses for 200 and 250 ppm, while these
+ * patches sit at 5 and 10 — so anyone reading a match against that scale
+ * overstated it by roughly 25×. The two vocabularies are kept disjoint.
+ *
+ * `ppm` stays here, unlike on the illustrative chart, because this ladder is
+ * a synthetic fixture: the figures are inputs the generator was given, not
+ * claims about any real solution.
+ */
 const LADDER: Array<{ label: string; ppm: number; rgb: [number, number, number] }> = [
-  { label: 'No Bromate', ppm: 0.0, rgb: [240, 240, 240] },
-  { label: 'Trace Amount', ppm: 0.1, rgb: [212, 236, 244] },
-  { label: 'Low Level', ppm: 0.5, rgb: [120, 207, 247] },
-  { label: 'Moderate Level', ppm: 1.0, rgb: [1, 132, 241] },
-  { label: 'High Level', ppm: 5.0, rgb: [1, 38, 156] },
-  { label: 'Very High Level', ppm: 10.0, rgb: [2, 5, 112] },
+  { label: 'Chart patch 1 — near-white', ppm: 0.0, rgb: [240, 240, 240] },
+  { label: 'Chart patch 2 — pale blue', ppm: 0.1, rgb: [212, 236, 244] },
+  { label: 'Chart patch 3 — light blue', ppm: 0.5, rgb: [120, 207, 247] },
+  { label: 'Chart patch 4 — mid blue', ppm: 1.0, rgb: [1, 132, 241] },
+  { label: 'Chart patch 5 — deep blue', ppm: 5.0, rgb: [1, 38, 156] },
+  { label: 'Chart patch 6 — darkest blue', ppm: 10.0, rgb: [2, 5, 112] },
 ];
 
 /** Classes to generate. Three well-separated levels, so the mapping is learnable. */

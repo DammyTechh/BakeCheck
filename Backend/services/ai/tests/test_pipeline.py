@@ -131,7 +131,7 @@ class TestHappyPath:
         response = pipeline.run(build_request(image, reference_levels))
 
         assert response.roi.mode == "AUTO_TUBE_DETECTION"
-        assert response.reference_match.label == "No Bromate"
+        assert response.reference_match.label == "Chart patch 1 — near-white"
 
     def test_colourless_tube_on_white_is_rejected_not_guessed(
         self, pipeline, reference_levels
@@ -140,7 +140,7 @@ class TestHappyPath:
         A colourless solution photographed against a white background is
         genuinely unmeasurable — there is almost no contrast between tube and
         background. The correct behaviour is to refuse, not to return a
-        confident "No Bromate" that happens to be right by luck.
+        confident "Chart patch 1 — near-white" that happens to be right by luck.
 
         This is a documented limitation; see docs/prototype-limitations.md.
         """
@@ -179,7 +179,7 @@ class TestHappyPath:
         assert response.color_features is not None
         # Some pixels must have been discarded.
         assert response.color_features.masked_fraction > 0.0
-        assert response.reference_match.label == "Moderate Level"
+        assert response.reference_match.label == "Chart patch 4 — mid blue"
 
 
 class TestScientificHonesty:

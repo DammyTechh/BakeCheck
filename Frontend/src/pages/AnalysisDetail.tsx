@@ -15,6 +15,7 @@ import { analysisClaim, modeExplanation, modeLabel } from '../lib/claims';
 import type { Analysis, ReferenceChart } from '../lib/types';
 import { PageHead } from '../components/AppShell';
 import { ReferenceLadder, type LadderBand } from '../components/ReferenceLadder';
+import { InterpretationScalePanel } from '../components/InterpretationScale';
 import {
   Banner,
   Button,
@@ -277,6 +278,12 @@ export function AnalysisDetail() {
             />
             <p className="mode-note">{modeExplanation(analysis.mode)}</p>
           </Panel>
+
+          {/* Shown whether or not a concentration exists. With none, it is
+              the clearest available answer to "the lab gave us a ppm scale,
+              so where is the ppm?" — the scale itself, marked as not
+              applied. */}
+          <InterpretationScalePanel />
 
           {!analysis.isConfirmedMeasurement ? (
             <Banner tone="caution" icon="science" title="Not a confirmed result">

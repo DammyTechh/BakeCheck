@@ -56,6 +56,81 @@ import {
  * `usableForMatching: false`.
  */
 export const ReferenceDocs = {
+  getInterpretationScale: () =>
+    applyDecorators(
+      ApiBearerAuth(),
+      ApiOperation({
+        summary: "The laboratory's ppm interpretation scale",
+        description: [
+          'Sixteen concentration-to-wording pairs, from `0` ("Negative") to',
+          '`1000` ("Extremely High"), as supplied by the laboratory on',
+          '16 October 2026.',
+          '',
+          '### This is a vocabulary, not a calibration',
+          '',
+          'The scale turns a concentration that has **already been',
+          'determined** into the word the laboratory uses for it. There is no',
+          'colour anywhere in it, so it cannot be run backwards: a',
+          'photograph, a measured colour or a ΔE to a chart patch will not',
+          'yield a ppm value through this scale, and its existence does not',
+          'change what an analysis may report.',
+          '',
+          '`POST /samples/{id}/analyze` still returns',
+          '`estimatedConcentration: null`. The scale is applied in exactly',
+          'one place — a `LABORATORY_MEASUREMENT` recorded against a sample',
+          'by a validated analytical method, where it appears as',
+          '`interpretation` on the measurement.',
+          '',
+          '### Values between two points',
+          '',
+          'The laboratory gave discrete points, not ranges. A value between',
+          'two of them is worded with **the highest point it reaches** — so',
+          '`249` reads as "High" (200), never as "Very High" (250) — and the',
+          'response carries `exact: false`, the `bracket` it fell in, and a',
+          'caveat saying so. `bracketRuleConfirmedByLaboratory` is `false`:',
+          'that rule is ours until they confirm it.',
+          '',
+          '### Do not read it against the reference chart',
+          '',
+          'The seeded chart is `ILLUSTRATIVE` and spans six colour patches.',
+          'It carries **no** concentration figures — the ones it used to',
+          'carry were read off an illustration and sat two orders of',
+          'magnitude below this scale, and its patches were named "High',
+          'Level" and "Very High Level", which are this scale’s words for',
+          '200 and 250 ppm. Reading one against the other overstated results',
+          'by roughly 25×. Patches are now named for their colour so the two',
+          'vocabularies cannot be confused.',
+        ].join('\n'),
+      }),
+      ApiOkResponse({
+        description: 'The scale, with its provenance and its limits.',
+        schema: {
+          type: 'object',
+          properties: {
+            unit: { type: 'string', example: 'ppm' },
+            min: { type: 'number', example: 0 },
+            max: { type: 'number', example: 1000 },
+            bracketRuleConfirmedByLaboratory: { type: 'boolean', example: false },
+            notAColorCalibration: { type: 'boolean', example: true },
+            provenance: { type: 'string' },
+            appliesTo: { type: 'string' },
+            points: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  concentration: { type: 'number', example: 200 },
+                  interpretation: { type: 'string', example: 'High' },
+                },
+              },
+            },
+          },
+        },
+      }),
+      UnauthorizedResponse(),
+      ForbiddenResponse('Reading reference data requires REFERENCE_READ'),
+    ),
+
   createMethod: () =>
     applyDecorators(
       ApiBearerAuth(),
@@ -173,13 +248,22 @@ export const ReferenceDocs = {
             summary: 'Chart with a six-step ladder',
             value: {
               testMethodId: '7a8b9c0d-1e2f-4a3b-8c4d-5e6f7a8b9c0d',
-              name: 'Bromate colour ladder, lot 2026-A',
-              source: 'Vendor insert, lot 2026-A',
+              name: 'Bromate colour ladder, prepared standards 2026-A',
+              source: 'Standards prepared in-house, 2026-A, certificate on file',
               illuminant: 'D65',
-              validationStatus: 'ILLUSTRATIVE',
+              // A chart being CREATED from prepared standards is the case
+              // where concentrations are genuinely known, so these levels
+              // carry them -- and are named with the laboratory's own ppm
+              // interpretation scale, which is what those numbers mean.
+              //
+              // Contrast the seeded ILLUSTRATIVE chart: its colours came off
+              // a picture, so its patches are named for their colour and
+              // carry no concentration at all. Do not mix the two
+              // vocabularies. See docs/prototype-limitations.md 1a.
+              validationStatus: 'VALIDATED',
               levels: [
                 {
-                  label: 'No Bromate',
+                  label: 'Negative',
                   concentrationValue: 0,
                   sortOrder: 0,
                   rgbR: 240,
@@ -187,40 +271,40 @@ export const ReferenceDocs = {
                   rgbB: 240,
                 },
                 {
-                  label: 'Trace Amount',
-                  concentrationValue: 0.1,
+                  label: 'Trace',
+                  concentrationValue: 10,
                   sortOrder: 1,
                   rgbR: 212,
                   rgbG: 236,
                   rgbB: 244,
                 },
                 {
-                  label: 'Low Level',
-                  concentrationValue: 0.5,
+                  label: 'Mild',
+                  concentrationValue: 50,
                   sortOrder: 2,
                   rgbR: 120,
                   rgbG: 207,
                   rgbB: 247,
                 },
                 {
-                  label: 'Moderate Level',
-                  concentrationValue: 1,
+                  label: 'Moderate',
+                  concentrationValue: 100,
                   sortOrder: 3,
                   rgbR: 1,
                   rgbG: 132,
                   rgbB: 241,
                 },
                 {
-                  label: 'High Level',
-                  concentrationValue: 5,
+                  label: 'High',
+                  concentrationValue: 200,
                   sortOrder: 4,
                   rgbR: 1,
                   rgbG: 38,
                   rgbB: 156,
                 },
                 {
-                  label: 'Very High Level',
-                  concentrationValue: 10,
+                  label: 'Very High',
+                  concentrationValue: 250,
                   sortOrder: 5,
                   rgbR: 2,
                   rgbG: 5,
@@ -232,7 +316,7 @@ export const ReferenceDocs = {
         },
       }),
       ApiCreatedResponse({ description: 'Chart created with its levels.' }),
-      BadRequestResponse('Reference level "Low Level" has no colour.', undefined),
+      BadRequestResponse('Reference level "Moderate" has no colour.', undefined),
       UnauthorizedResponse(),
       ForbiddenResponse('This operation requires: reference:manage'),
       NotFoundResponse('Test method'),

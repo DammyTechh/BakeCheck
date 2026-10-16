@@ -22,7 +22,7 @@
   },
   "prediction": {
     "referenceLevelId": "1adf3ee0-b0e9-4f11-a4f1-8d9f421306da",
-    "label": "Very High Level",
+    "label": "Chart patch 6 — darkest blue",
     "referenceConcentration": 10,
     "referenceUnit": "ppm",
     "referenceColorRgb": [
@@ -36,19 +36,19 @@
     "colorDistance": 11.7502,
     "alternatives": [
       {
-        "label": "High Level",
+        "label": "Chart patch 5 — deep blue",
         "colorDistance": 13.1953,
         "referenceLevelId": "009682fe-7828-4bf0-afc1-1b61e1f61ef6",
         "concentrationValue": 5
       },
       {
-        "label": "Moderate Level",
+        "label": "Chart patch 4 — mid blue",
         "colorDistance": 37.3469,
         "referenceLevelId": "58916ca5-aab9-45d5-9e00-83175ba63d79",
         "concentrationValue": 1
       },
       {
-        "label": "Low Level",
+        "label": "Chart patch 3 — light blue",
         "colorDistance": 66.5337,
         "referenceLevelId": "88e9d21f-3505-47cc-88fb-3045f9174721",
         "concentrationValue": 0.5

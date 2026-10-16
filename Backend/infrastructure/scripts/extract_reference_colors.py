@@ -25,13 +25,68 @@ from PIL import Image
 # expressed as a fraction of the chart's width and the vertical band of liquid
 # as fractions of its height. Fractions rather than pixels so the same geometry
 # works if the chart is rescaled.
+#
+# Two deliberate choices here, both made on 16 October 2026 — do not undo
+# them when next adjusting this script:
+#
+# 1. Patches are named for their COLOUR, not for a level. The illustration's
+#    own labels ("High Level", "Very High Level") are the words the
+#    laboratory's ppm reporting scale uses for 200 and 250 ppm, while the
+#    illustration placed them at 5 and 10. A colour match shown in those
+#    words overstated the result by roughly 25x to anyone reading it against
+#    that scale.
+#
+# 2. `concentration` is None for every patch. The illustration's figures span
+#    0-10 ppm where the laboratory's scale reaches 1000, which makes them
+#    wrong by about two orders of magnitude rather than merely unvalidated.
+#    A wrong number is worse than no number. The figures are recorded below
+#    as `illustration_label` and `illustration_concentration` for provenance
+#    only, and are NOT written into the seed.
+#
+# See docs/prototype-limitations.md 1a.
 TUBE_LAYOUT = [
-    {"label": "No Bromate", "concentration": 0.0, "x_frac": 0.143},
-    {"label": "Trace Amount", "concentration": 0.1, "x_frac": 0.279},
-    {"label": "Low Level", "concentration": 0.5, "x_frac": 0.419},
-    {"label": "Moderate Level", "concentration": 1.0, "x_frac": 0.559},
-    {"label": "High Level", "concentration": 5.0, "x_frac": 0.699},
-    {"label": "Very High Level", "concentration": 10.0, "x_frac": 0.843},
+    {
+        "label": "Chart patch 1 — near-white",
+        "concentration": None,
+        "x_frac": 0.143,
+        "illustration_label": "No Bromate",
+        "illustration_concentration": 0.0,
+    },
+    {
+        "label": "Chart patch 2 — pale blue",
+        "concentration": None,
+        "x_frac": 0.279,
+        "illustration_label": "Trace Amount",
+        "illustration_concentration": 0.1,
+    },
+    {
+        "label": "Chart patch 3 — light blue",
+        "concentration": None,
+        "x_frac": 0.419,
+        "illustration_label": "Low Level",
+        "illustration_concentration": 0.5,
+    },
+    {
+        "label": "Chart patch 4 — mid blue",
+        "concentration": None,
+        "x_frac": 0.559,
+        "illustration_label": "Moderate Level",
+        "illustration_concentration": 1.0,
+    },
+    {
+        "label": "Chart patch 5 — deep blue",
+        "concentration": None,
+        "x_frac": 0.699,
+        "illustration_label": "High Level",
+        "illustration_concentration": 5.0,
+    },
+    {
+        "label": "Chart patch 6 — darkest blue",
+        "concentration": None,
+        "x_frac": 0.843,
+        "illustration_label": "Very High Level",
+        "illustration_concentration": 10.0,
+    },
 ]
 
 # Vertical band to sample, as a fraction of chart height. Chosen to sit below
@@ -190,8 +245,13 @@ def main() -> int:
             {
                 "sort_order": order,
                 "label": tube["label"],
+                # Always None — see the note on TUBE_LAYOUT.
                 "concentration_value": tube["concentration"],
                 "concentration_unit": "ppm",
+                # Provenance only. What the illustration itself claimed, kept
+                # so the rename is traceable. Never read as a measurement.
+                "previous_label": tube["illustration_label"],
+                "illustration_concentration": tube["illustration_concentration"],
                 **measurement,
             }
         )

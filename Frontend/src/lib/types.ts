@@ -178,6 +178,46 @@ export interface Analysis {
   completedAt: string | null;
 }
 
+/** One point on the laboratory's ppm interpretation scale. */
+export interface ScalePoint {
+  concentration: number;
+  interpretation: string;
+}
+
+/**
+ * The scale as the API serves it.
+ *
+ * `notAColorCalibration` is stated in the payload rather than left implicit:
+ * a ppm scale sitting in a colour-matching product invites the opposite
+ * inference, and the API says so explicitly so a client cannot quietly drop
+ * the qualification.
+ */
+export interface InterpretationScale {
+  unit: string;
+  provenance: string;
+  min: number;
+  max: number;
+  bracketRuleConfirmedByLaboratory: boolean;
+  points: ScalePoint[];
+  appliesTo: string;
+  notAColorCalibration: boolean;
+}
+
+/**
+ * The scale applied to one concentration. Only ever produced for a
+ * `LABORATORY_MEASUREMENT`; an image-derived analysis has no concentration,
+ * so it has no interpretation either.
+ */
+export interface Interpretation {
+  interpretation: string | null;
+  matchedConcentration: number | null;
+  /** False when the value fell between two points, or above the top one. */
+  exact: boolean;
+  bracket: { lower: ScalePoint; upper: ScalePoint } | null;
+  aboveScale: boolean;
+  caveats: string[];
+}
+
 export interface ReferenceLevel {
   id: string;
   label: string;

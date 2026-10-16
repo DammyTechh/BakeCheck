@@ -1,9 +1,4 @@
-# BakeCheck — backend
-
-The React frontend is a separate repository, deployed to Vercel.
-See `DEPLOY.md`.
-
-## BreadGuard AI
+# BreadGuard AI
 
 Laboratory-assisted chemical screening platform. A technician photographs the
 coloured solution produced by a laboratory test, and the system measures its

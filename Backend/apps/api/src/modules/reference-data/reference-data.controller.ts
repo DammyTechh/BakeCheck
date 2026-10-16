@@ -29,6 +29,14 @@ import {
   UpdateTestMethodDto,
 } from './dto/reference.dto';
 import { ReferenceDataService } from './reference-data.service';
+import {
+  BRACKET_RULE_CONFIRMED,
+  INTERPRETATION_SCALE,
+  SCALE_MAX,
+  SCALE_MIN,
+  SCALE_PROVENANCE,
+  SCALE_UNIT,
+} from './interpretation-scale';
 
 /**
  * Test methods and reference charts.
@@ -88,6 +96,34 @@ export class ReferenceDataController {
       );
     }
     return this.referenceService.createTestMethod(dto, user, request.correlationId);
+  }
+
+  /**
+   * The laboratory's ppm interpretation scale.
+   *
+   * Static, laboratory-supplied reporting vocabulary. It takes no sample and
+   * reads nothing from the database, so it needs no laboratory scoping — but
+   * it stays behind authentication alongside the rest of the reference data.
+   */
+  @Get('reference-data/interpretation-scale')
+  @RequirePermissions(Permission.REFERENCE_READ)
+  @ReferenceDocs.getInterpretationScale()
+  getInterpretationScale() {
+    return {
+      unit: SCALE_UNIT,
+      provenance: SCALE_PROVENANCE,
+      min: SCALE_MIN,
+      max: SCALE_MAX,
+      bracketRuleConfirmedByLaboratory: BRACKET_RULE_CONFIRMED,
+      points: INTERPRETATION_SCALE,
+      // Stated in the payload so a client cannot infer the opposite from the
+      // mere presence of a ppm scale in a colour-matching product.
+      appliesTo:
+        'A concentration determined by a validated analytical method and ' +
+        'recorded against the sample. It is not applied to image-derived ' +
+        'results, which carry no concentration.',
+      notAColorCalibration: true,
+    };
   }
 
   @Get('test-methods')

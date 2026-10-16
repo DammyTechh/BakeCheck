@@ -345,7 +345,7 @@ export class CreateReferenceChartDto {
 }
 
 export class CreateReferenceLevelDto {
-  @ApiProperty({ example: 'Low Level', maxLength: 120 })
+  @ApiProperty({ example: 'Chart patch 3 — light blue', maxLength: 120 })
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)

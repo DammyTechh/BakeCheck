@@ -1,7 +1,7 @@
-# Deploying the BakeCheck backend
+# Deploying BakeCheck
 
-This repository → **Render** (Node API + Python vision service + Postgres).
-The React frontend lives in its own repository and goes to **Vercel**.
+Backend → **Render** (Node API + Python vision service + Postgres).
+Frontend → **Vercel** (React).
 
 Do them in that order: the frontend needs the API's URL, and the API needs the
 frontend's origin for CORS. You will come back and fill in one value on each
@@ -105,11 +105,11 @@ Expect `"database": true` and `"aiService": true`. Copy this API URL.
 
 ## 3. Frontend on Vercel
 
-Vercel → **Add New** → **Project** → pick the **frontend** repository.
+Vercel → **Add New** → **Project** → pick the same repository.
 
 | Setting | Value |
 |---|---|
-| **Root Directory** | `.` — that repository *is* the app |
+| **Root Directory** | `apps/web` ← this one matters most |
 | Framework Preset | Vite (detected) |
 | Build / Output / Install | leave as detected — `vercel.json` sets them |
 

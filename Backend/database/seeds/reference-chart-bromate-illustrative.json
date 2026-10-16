@@ -9,12 +9,12 @@
   "color_space": "sRGB",
   "illuminant": "D65 (assumed; the illustration carries no colour profile)",
   "validation_status": "ILLUSTRATIVE",
-  "provenance_note": "Colours were read from an AI-generated illustration of a bromate colour chart. They describe the picture, not a calibrated colorimetric standard, and establish no validated relationship between colour and bromate concentration in any sample matrix.",
+  "provenance_note": "Colours were read from an AI-generated illustration of a bromate colour chart. They describe the picture, not a calibrated colorimetric standard, and establish no validated relationship between colour and bromate concentration in any sample matrix. Each patch is named for its colour rather than for a level: the previous labels (\"High Level\", \"Very High Level\", and so on) are the words the laboratory uses on its own ppm reporting scale for 200 and 250 ppm, while these patches had been given figures of 5 and 10 ppm -- so a colour match reported in those words overstated the result by roughly 25x to anyone reading it against that scale. The per-patch concentration figures have been removed entirely. They came from the illustration, and the laboratory scale runs to 1000 ppm against this chart’s 10, which makes them wrong by about two orders of magnitude rather than merely unvalidated. Patches carry colour and ordering only until the chart is rebuilt from prepared standards of known concentration.",
   "levels": [
     {
       "sort_order": 0,
-      "label": "No Bromate",
-      "concentration_value": 0.0,
+      "label": "Chart patch 1 — near-white",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         240,
@@ -38,12 +38,13 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5900
+      "pixels_sampled": 5900,
+      "previous_label": "No Bromate"
     },
     {
       "sort_order": 1,
-      "label": "Trace Amount",
-      "concentration_value": 0.1,
+      "label": "Chart patch 2 — pale blue",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         212,
@@ -67,12 +68,13 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5866
+      "pixels_sampled": 5866,
+      "previous_label": "Trace Amount"
     },
     {
       "sort_order": 2,
-      "label": "Low Level",
-      "concentration_value": 0.5,
+      "label": "Chart patch 3 — light blue",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         120,
@@ -96,12 +98,13 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5850
+      "pixels_sampled": 5850,
+      "previous_label": "Low Level"
     },
     {
       "sort_order": 3,
-      "label": "Moderate Level",
-      "concentration_value": 1.0,
+      "label": "Chart patch 4 — mid blue",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         1,
@@ -125,12 +128,13 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5851
+      "pixels_sampled": 5851,
+      "previous_label": "Moderate Level"
     },
     {
       "sort_order": 4,
-      "label": "High Level",
-      "concentration_value": 5.0,
+      "label": "Chart patch 5 — deep blue",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         1,
@@ -154,12 +158,13 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5850
+      "pixels_sampled": 5850,
+      "previous_label": "High Level"
     },
     {
       "sort_order": 5,
-      "label": "Very High Level",
-      "concentration_value": 10.0,
+      "label": "Chart patch 6 — darkest blue",
+      "concentration_value": null,
       "concentration_unit": "ppm",
       "rgb": [
         2,
@@ -183,7 +188,8 @@
         "width": 52,
         "height": 125
       },
-      "pixels_sampled": 5854
+      "pixels_sampled": 5854,
+      "previous_label": "Very High Level"
     }
   ]
 }

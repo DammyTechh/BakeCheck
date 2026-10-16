@@ -132,7 +132,7 @@ describe('how close the match actually was', () => {
           alternatives: [
             {
               referenceLevelId: 'lv4',
-              label: 'Very High Level',
+              label: 'Chart patch 6 — darkest blue',
               concentrationValue: 10,
               colorDistance: 4.0 + AMBIGUOUS_DELTA_E - 0.1,
             },
@@ -153,7 +153,7 @@ describe('how close the match actually was', () => {
           alternatives: [
             {
               referenceLevelId: 'lv-other',
-              label: 'High Level',
+              label: 'Chart patch 5 — deep blue',
               concentrationValue: 5,
               colorDistance: 9.0,
             },
@@ -167,8 +167,8 @@ describe('how close the match actually was', () => {
   it('calls the real captured result ambiguous, because it is', () => {
     /*
      * Worth pinning down rather than treating as incidental. This is one of
-     * the laboratory's own photographs: it matched "Very High Level" at
-     * 11.8 ΔE with "High Level" only ~1.6 further away. Both numbers are
+     * the laboratory's own photographs: it matched "Chart patch 6 — darkest blue" at
+     * 11.8 ΔE with "Chart patch 5 — deep blue" only ~1.6 further away. Both numbers are
      * large, and the gap between them is smaller than a person could judge
      * by eye. Presenting the winner alone would turn a genuinely unclear
      * reading into a confident one.

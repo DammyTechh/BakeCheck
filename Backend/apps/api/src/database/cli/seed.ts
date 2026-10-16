@@ -31,8 +31,17 @@ const SEEDS_DIR = resolve(__dirname, '../../../../../database/seeds');
 interface ReferenceLevelSeed {
   sort_order: number;
   label: string;
-  concentration_value: number;
+  /**
+   * Null for the illustrative chart. The figures it used to carry were read
+   * off an illustration and sat two orders of magnitude below the range the
+   * laboratory's own reporting scale covers, so they were removed rather
+   * than merely flagged. A patch carries colour and ordering until the chart
+   * is rebuilt from prepared standards.
+   */
+  concentration_value: number | null;
   concentration_unit: string;
+  /** What this patch used to be called, kept for the audit trail. */
+  previous_label?: string;
   rgb: [number, number, number];
   lab: [number, number, number];
   lab_std: number;
