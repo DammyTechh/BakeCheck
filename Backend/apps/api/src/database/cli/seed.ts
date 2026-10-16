@@ -45,7 +45,13 @@ interface ReferenceLevelSeed {
   rgb: [number, number, number];
   lab: [number, number, number];
   lab_std: number;
-  roi: { x: number; y: number; width: number; height: number };
+  /**
+   * The region of the source image this colour was read from, when it was
+   * read from one. Null for an interpolated level: the schema rejects a
+   * zero-sized region, correctly, because "no region" and "a region of no
+   * size" are different claims.
+   */
+  roi: { x: number; y: number; width: number; height: number } | null;
 }
 
 interface ReferenceChartSeed {
@@ -292,7 +298,7 @@ async function main(): Promise<void> {
            color_source, validation_status, notes
          )
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
-                 'IMAGE_SAMPLED','ILLUSTRATIVE',$17)
+                 'MANUAL_ENTRY','ILLUSTRATIVE',$17)
          ON CONFLICT (reference_chart_id, sort_order) DO UPDATE
            SET label = EXCLUDED.label,
                concentration_value = EXCLUDED.concentration_value,
@@ -312,10 +318,10 @@ async function main(): Promise<void> {
           level.lab[1],
           level.lab[2],
           level.lab_std,
-          level.roi.x,
-          level.roi.y,
-          level.roi.width,
-          level.roi.height,
+          level.roi?.x ?? null,
+          level.roi?.y ?? null,
+          level.roi?.width ?? null,
+          level.roi?.height ?? null,
           'Colour read from an illustration, not measured from a prepared standard.',
         ],
       );

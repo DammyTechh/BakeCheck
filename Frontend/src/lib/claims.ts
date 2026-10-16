@@ -142,12 +142,18 @@ export function analysisClaim(analysis: Analysis): Claim {
     );
   }
 
-  // A concentration is only ever shown when the backend supplied one, which
-  // it does only when the whole chain is validated. The UI never derives it.
+  // The reading: the ppm printed against the chart level the measured colour
+  // matched, plus the laboratory's wording for that level. Both come from the
+  // chart -- the UI derives neither.
+  //
+  // `estimatedConcentration` is a different thing: a validated model's own
+  // estimate. It is preferred when present, and is null for colour matching.
   const concentration =
     prediction.estimatedConcentration !== null && prediction.concentrationUnit
       ? { value: prediction.estimatedConcentration, unit: prediction.concentrationUnit }
-      : null;
+      : prediction.referenceConcentration !== null && prediction.referenceUnit
+        ? { value: prediction.referenceConcentration, unit: prediction.referenceUnit }
+        : null;
 
   if (analysis.isConfirmedMeasurement) {
     return {
@@ -171,19 +177,12 @@ export function analysisClaim(analysis: Analysis): Claim {
 
   const qualifier = (() => {
     if (methodIsDraft || chartIsIllustrative) {
-      return (
-        'Screening observation only. The colour was matched against a chart ' +
-        'that has not been validated against known standards, so this names ' +
-        'a colour band — not a bromate concentration.'
-      );
+      return 'Screening reading from an unvalidated chart. Confirm before acting on it.';
     }
     if (!model.validated) {
-      return (
-        'Screening observation only. The model producing this result has not ' +
-        'been validated against confirmed measurements.'
-      );
+      return 'Screening reading. The model behind it is not yet validated.';
     }
-    return 'Screening observation. Confirm with a laboratory measurement before acting on it.';
+    return 'Screening reading. Confirm with a laboratory measurement before acting on it.';
   })();
 
   return {

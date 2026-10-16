@@ -35,9 +35,13 @@ describe('the fixture is a real API response', () => {
     expect(['USABLE', 'MARGINAL', 'UNUSABLE']).toContain(BASE.imageQuality.verdict);
   });
 
-  it('is a completed screening result with no concentration', () => {
+  it('is a completed screening result carrying the chart level it matched', () => {
     expect(BASE.status).toBe('COMPLETED');
+    // No MODEL estimate -- colour matching produces none.
     expect(BASE.prediction.estimatedConcentration).toBeNull();
+    // But the chart level it matched has a printed ppm, and that is the
+    // reading the technician is shown.
+    expect(BASE.prediction.referenceConcentration).not.toBeNull();
   });
 
   it('reads as measurable, not as a rejected image', () => {
@@ -47,9 +51,43 @@ describe('the fixture is a real API response', () => {
 });
 
 describe('what the interface may claim', () => {
-  it('never invents a concentration when the API withheld one', () => {
+  it('reports the ppm printed against the chart level that matched', () => {
+    // This replaces an earlier rule that withheld every number. The chart now
+    // carries the laboratory's own sixteen-point scale, so the matched level
+    // HAS a ppm -- and hiding it left the technician with a colour name and
+    // no reading, which is not what the chart is for. What the number means
+    // is carried by the qualifier and the chart's validation status, not by
+    // suppressing it.
     const claim = analysisClaim(analysis());
+    expect(claim.concentration).toEqual({ value: 10, unit: 'ppm' });
+  });
+
+  it('invents nothing when the matched level carries no ppm', () => {
+    // An unlabelled level still yields no number. The UI reads the chart; it
+    // never derives a value.
+    const claim = analysisClaim(
+      analysis({
+        prediction: {
+          ...analysis().prediction,
+          referenceConcentration: null,
+          referenceUnit: null,
+        },
+      }),
+    );
     expect(claim.concentration).toBeNull();
+  });
+
+  it('prefers a validated model estimate over the chart value', () => {
+    const claim = analysisClaim(
+      analysis({
+        prediction: {
+          ...analysis().prediction,
+          estimatedConcentration: 42,
+          concentrationUnit: 'ppm',
+        },
+      }),
+    );
+    expect(claim.concentration).toEqual({ value: 42, unit: 'ppm' });
   });
 
   it('never invents a confidence for a colour comparison', () => {
@@ -72,23 +110,29 @@ describe('what the interface may claim', () => {
   });
 
   it('withholds the concentration if a unit is missing', () => {
-    // A bare number with no unit is not a measurement.
+    // A bare number with no unit is not a reading.
     const claim = analysisClaim(
       analysis({
         prediction: {
           ...analysis().prediction,
           estimatedConcentration: 4.2,
           concentrationUnit: null,
+          referenceConcentration: null,
+          referenceUnit: null,
         },
       }),
     );
     expect(claim.concentration).toBeNull();
   });
 
-  it('says the result names a colour band, not a concentration', () => {
+  it('says the reading came from an unvalidated chart, in one sentence', () => {
+    // The qualifier used to be three sentences of hedging stacked above the
+    // result. One sentence that a technician will actually read beats three
+    // that they will not.
     const claim = analysisClaim(analysis());
     expect(claim.strength).toBe('screening');
-    expect(claim.qualifier).toMatch(/not a bromate concentration/i);
+    expect(claim.qualifier).toMatch(/unvalidated chart/i);
+    expect(claim.qualifier.split(/(?<=\.)\s/)).toHaveLength(2);
   });
 
   it('stays visually neutral for a screening result, however dark the tube', () => {
@@ -132,7 +176,7 @@ describe('how close the match actually was', () => {
           alternatives: [
             {
               referenceLevelId: 'lv4',
-              label: 'Chart patch 6 — darkest blue',
+              label: 'Very High',
               concentrationValue: 10,
               colorDistance: 4.0 + AMBIGUOUS_DELTA_E - 0.1,
             },
@@ -153,7 +197,7 @@ describe('how close the match actually was', () => {
           alternatives: [
             {
               referenceLevelId: 'lv-other',
-              label: 'Chart patch 5 — deep blue',
+              label: 'High',
               concentrationValue: 5,
               colorDistance: 9.0,
             },
@@ -167,8 +211,8 @@ describe('how close the match actually was', () => {
   it('calls the real captured result ambiguous, because it is', () => {
     /*
      * Worth pinning down rather than treating as incidental. This is one of
-     * the laboratory's own photographs: it matched "Chart patch 6 — darkest blue" at
-     * 11.8 ΔE with "Chart patch 5 — deep blue" only ~1.6 further away. Both numbers are
+     * the laboratory's own photographs: it matched "Very High" at
+     * 11.8 ΔE with "High" only ~1.6 further away. Both numbers are
      * large, and the gap between them is smaller than a person could judge
      * by eye. Presenting the winner alone would turn a genuinely unclear
      * reading into a confident one.

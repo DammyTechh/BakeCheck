@@ -13,27 +13,21 @@ pass quality assessment and match a band.
 
 Measured on the seeded chart:
 
-| File | Nearest patch | ΔE (CIEDE2000) | Quality |
+| File | Reading | Nearest level | ΔE (CIEDE2000) |
 |---|---|---|---|
-| `tube-1.jpg` | Chart patch 5 — deep blue | 14.09 | USABLE (0.80) |
-| `tube-2.jpg` | Chart patch 5 — deep blue | 9.30 | USABLE (0.95) |
-| `tube-3.jpg` | Chart patch 6 — darkest blue | 12.54 | USABLE (0.80) |
-| `tube-4.jpg` | Chart patch 6 — darkest blue | 11.93 | USABLE (0.95) |
+| `tube-1.jpg` | 500 ppm · Intense | Intense | 11.61 |
+| `tube-2.jpg` | 1000 ppm · Extremely High | Extremely High | 12.54 |
+| `tube-3.jpg` | 400 ppm · Severe | Severe | 9.30 |
+| `tube-4.jpg` | 350 ppm · Very Heavy | Very Heavy | 7.98 |
 
-Those ΔE values are large. A match at ΔE 9–14 means "this is the closest of
-the six patches", not "this is that patch" — the colours sit between patches,
-or outside the range the chart covers.
+Measured against the sixteen-level chart built from the laboratory's own
+scale, 16 October 2026.
 
-### These photographs are why the patches were renamed
-
-Patches 5 and 6 used to be called "High Level" and "Very High Level". The
-laboratory's ppm interpretation scale, supplied the following day, uses those
-same words for 200 and 250 ppm — while the chart had put them at 5 and 10 ppm.
-
-So all four of these tubes displayed as "High Level" or "Very High Level",
-which a reader holding that scale would take as 200–250 ppm, from patches the
-chart itself numbered at 5–10. See `docs/prototype-limitations.md` §1a. The
-patches now describe their colour, and carry no concentration figure at all.
+**Those ppm figures are not measurements.** The chart's concentrations are the
+laboratory's; its colours are interpolated from an illustration, so each
+reading means "nearest level on an illustrative ladder". ΔE 8-13 is a visible
+colour difference, which says the tubes sit between levels or outside the
+range the ramp covers. See `docs/prototype-limitations.md` §1b.
 
 ## What these are NOT useful for
 

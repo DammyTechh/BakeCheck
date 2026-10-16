@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   BRACKET_RULE_CONFIRMED,
   INTERPRETATION_SCALE,
@@ -51,19 +53,46 @@ describe('the laboratory ppm interpretation scale', () => {
       expect(new Set(values).size).toBe(values.length);
     });
 
-    it('uses no wording that also names a reference chart patch', () => {
-      // The collision this scale exposed: the illustrative chart called
-      // 10 ppm "Very High Level" while this scale calls 10 ppm "Trace".
-      // Chart patches are now described by colour, so the two vocabularies
-      // must stay disjoint. A shared word here would reopen the trap.
-      const chartPatchWords = ['patch', 'blue', 'white', 'colourless'];
-      for (const point of INTERPRETATION_SCALE) {
-        const lowered = point.interpretation.toLowerCase();
-        for (const word of chartPatchWords) {
-          expect(lowered).not.toContain(word);
+    it('is exactly what the seeded reference chart is built from', () => {
+      // The chart and the scale used to be two vocabularies, and reading one
+      // against the other overstated results by ~25x. They are now one: a
+      // chart level IS a point on this scale -- same ppm, same wording. This
+      // test fails if the seed and the scale ever drift apart again.
+      const seed = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            '../../../database/seeds/reference-chart-bromate-illustrative.json',
+          ),
+          'utf8',
+        ),
+      ) as { levels: Array<{ label: string; concentration_value: number }> };
+
+      expect(
+        seed.levels.map((l) => [l.concentration_value, l.label]),
+      ).toEqual(INTERPRETATION_SCALE.map((p) => [p.concentration, p.interpretation]));
+    });
+
+    it('gives every chart level a colour, so every level can be matched', () => {
+      const seed = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            '../../../database/seeds/reference-chart-bromate-illustrative.json',
+          ),
+          'utf8',
+        ),
+      ) as { levels: Array<{ rgb: number[] }> };
+
+      for (const level of seed.levels) {
+        expect(level.rgb).toHaveLength(3);
+        for (const channel of level.rgb) {
+          expect(channel).toBeGreaterThanOrEqual(0);
+          expect(channel).toBeLessThanOrEqual(255);
         }
       }
     });
+
   });
 
   describe('a value exactly on a point', () => {

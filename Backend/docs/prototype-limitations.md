@@ -42,72 +42,64 @@ enter those values as a chart marked `VALIDATED`.
 
 ---
 
-## 1a. The chart once used the laboratory's own words for the wrong numbers
+## 1a. The chart IS the laboratory's scale
 
-On 16 October 2026 the laboratory supplied its ppm interpretation scale:
-sixteen points from 0 ("Negative") to 1000 ("Extremely High"), with 200 =
-"High" and 250 = "Very High".
+On 16 October 2026 the laboratory supplied its reporting scale: sixteen
+points from 0 ("Negative") to 1000 ("Extremely High"). The reference chart is
+now built from exactly those sixteen points -- same ppm values, same wording.
 
-The chart, built from the illustration, had been given figures of 0–10 ppm,
-and its patches were labelled "High Level" at 5 ppm and "Very High Level" at
-10 ppm.
+There is one vocabulary, not two. A chart level *is* a point on the scale, and
+`test/interpretation-scale.spec.ts` fails if the seed and the scale drift
+apart.
 
-Put those side by side:
+This replaced an arrangement that was actively dangerous. The chart had been
+built from an illustration with its own figures (0-10 ppm) and its own labels
+-- "High Level" at 5 ppm, "Very High Level" at 10. Those are the laboratory's
+words for 200 and 250 ppm. All four real tube photographs matched those two
+levels, so the screen said "Very High Level" for a tube the chart numbered at
+10 ppm, and anyone reading that against the scale would infer 250. A 25x
+overstatement assembled from two artefacts that were each labelled correctly.
 
-| Patch | Chart said | The laboratory's word for that number | The laboratory's number for that word |
-|---|---|---|---|
-| 5 | High Level, 5 ppm | Negative | 200 ppm |
-| 6 | Very High Level, 10 ppm | Trace | 250 ppm |
+## 1b. The concentrations are the laboratory's. The colours are not.
 
-All four real laboratory photographs matched patch 5 or patch 6. So the
-screen read **"Very High Level"** for a tube that, on the laboratory's own
-scale, the chart's own number would have called **"Trace"** — and anyone
-reading that phrase against the scale they had just written would infer
-250 ppm. A 25× overstatement, in the laboratory's own vocabulary, from two
-pieces of data that were each individually labelled correctly.
+This is the live limitation, and the only one that matters for how a result
+should be read.
 
-Nothing was mislabelled. `ILLUSTRATIVE` was on every level, and the API
-returned `estimatedConcentration: null` throughout. The failure was that two
-honest artefacts shared a vocabulary, and a reader joins them up.
+- **The sixteen ppm values and their wording** are the laboratory's own,
+  recorded verbatim.
+- **The colour of each level is not measured.** No prepared standard has been
+  photographed. The six colours sampled from the chart illustration were
+  interpolated across the sixteen levels in CIELAB and spread by ladder
+  position -- the ppm steps are uneven (10 apart at the bottom, 500 at the
+  top) and no relationship between colour and concentration has been
+  established, so an even visual ramp is the only defensible placeholder.
 
-Two changes:
+So a reading of "350 ppm, Very Heavy" means: *the measured colour was nearest
+to the level printed 350 ppm on an illustrative ladder.* It is not a
+measurement of bromate. The chart is marked `ILLUSTRATIVE`, the method
+`DRAFT`, and the result screen says "Screening reading from an unvalidated
+chart" above every number.
 
-1. **Patches are named for their colour.** The two vocabularies are now
-   disjoint, and `test/interpretation-scale.spec.ts` fails if a scale word
-   ever reappears as a patch word.
-2. **The chart's concentration figures were removed, not merely flagged.**
-   They came off an illustration, and the laboratory's working range reaches
-   1000 ppm against the chart's 10 — so they were not just unvalidated, they
-   were wrong by roughly two orders of magnitude. A wrong number is worse
-   than no number, and `concentration_value` is now `NULL` on every patch.
-   The Python matcher already skipped null-concentration levels when
-   interpolating, so this disables interpolation rather than breaking it.
+**What would fix it, concretely:** photograph the sixteen prepared standards
+under controlled lighting with a colour reference in frame, run
+`infrastructure/scripts/extract_reference_colors.py` over the photograph, and
+mark the chart `VALIDATED`. Nothing else in the pipeline has to change -- the
+matcher, the ladder and the reading already work off whatever colours the
+chart carries.
 
----
+**Why the ppm is shown at all**, given the above: the chart now carries the
+laboratory's own values, so the matched level *has* a number. Hiding it left a
+technician with a colour name and no reading, which is not what a colour chart
+is for. What the number means is carried by the qualifier and the chart's
+status, not by suppressing the number.
 
-## 1b. The interpretation scale is a vocabulary, not a calibration
+### Values between two points
 
-The scale is served at `GET /api/v1/reference-data/interpretation-scale` and
-shown on the analysis screen, greyed and marked **not applied**.
-
-It converts a concentration that has **already been determined** into the
-laboratory's wording for it. There is no colour anywhere in it, so it cannot
-be run backwards: no photograph, measured colour or ΔE yields a ppm value
-through this scale. Receiving it did not change what any analysis may report,
-and `estimatedConcentration` is still `null` on every image-derived result.
-
-It is applied in exactly one place: a `LABORATORY_MEASUREMENT` recorded
-against a sample by a validated analytical method, where it appears as
-`interpretation` on the measurement. Below-detection-limit measurements are
-left unworded — "Negative" and "below what this method can detect" are
-different claims, and only the second is true.
-
-**One rule is ours, not theirs.** The laboratory gave discrete points, not
-ranges, and did not say how to word 15 ppm. A value between two points takes
-the **highest point it reaches**, so 249 ppm reads as "High" and never rounds
-up into "Very High"; the response carries `exact: false`, the bracket, and a
-caveat saying the rule is unconfirmed. `bracketRuleConfirmedByLaboratory` is
-`false` until they confirm it in writing.
+The laboratory gave discrete points, not ranges, and did not say how to word
+15 ppm. A value between two points takes the **highest point it reaches**, so
+249 ppm reads as "High" and never rounds up into "Very High".
+`bracketRuleConfirmedByLaboratory` is `false`: that rule is ours until the
+laboratory confirms it.
 
 ---
 

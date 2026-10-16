@@ -15,7 +15,6 @@ import { analysisClaim, modeExplanation, modeLabel } from '../lib/claims';
 import type { Analysis, ReferenceChart } from '../lib/types';
 import { PageHead } from '../components/AppShell';
 import { ReferenceLadder, type LadderBand } from '../components/ReferenceLadder';
-import { InterpretationScalePanel } from '../components/InterpretationScale';
 import {
   Banner,
   Button,
@@ -60,7 +59,7 @@ export function AnalysisDetail() {
       id: level.id,
       label: level.label,
       concentrationValue: level.concentrationValue,
-      rgb: level.colorRgb,
+      rgb: level.rgb,
     })) ?? [];
 
   return (
@@ -92,7 +91,13 @@ export function AnalysisDetail() {
                         ? 'Observed colour'
                         : 'No reading'}
                   </p>
-                  <h2 className="verdict-headline">{claim.headline}</h2>
+                  {/* The headline is the laboratory's wording, and when a ppm
+                      exists it is already shown beside that number below.
+                      Repeating it here said the same word twice, a line
+                      apart. Shown only when there is no reading to carry it. */}
+                  {claim.concentration ? null : (
+                    <h2 className="verdict-headline">{claim.headline}</h2>
+                  )}
                 </div>
                 <Pill
                   tone={
@@ -112,46 +117,76 @@ export function AnalysisDetail() {
 
               <p className="verdict-qualifier">{claim.qualifier}</p>
 
-              <div className="verdict-figures">
-                <Figure
-                  label="Concentration"
-                  value={
-                    claim.concentration
-                      ? `${claim.concentration.value} ${claim.concentration.unit}`
-                      : null
-                  }
-                  absent="Not reported"
-                  note={
-                    claim.concentration
-                      ? undefined
-                      : 'Requires a validated method and chart.'
-                  }
-                />
-                <Figure
-                  label="Confidence"
-                  value={
-                    claim.confidence === null
-                      ? null
-                      : `${Math.round(claim.confidence * 100)}%`
-                  }
-                  absent="Not applicable"
-                  note={
-                    claim.confidence === null
-                      ? 'A colour distance is not a probability.'
-                      : undefined
-                  }
-                />
-                <Figure
-                  label="Colour distance"
-                  value={claim.distance === null ? null : `ΔE ${claim.distance.toFixed(1)}`}
-                  absent="—"
-                  note={
-                    claim.distance !== null && claim.distance > 5
-                      ? 'A visible difference from the band.'
-                      : undefined
-                  }
-                />
+              {/* The reading. One number and one word, which is what the
+                  technician came to this screen for. Everything qualifying it
+                  is one click away rather than stacked around it -- the three
+                  figures and a limitations list that used to sit here buried
+                  the answer. */}
+              <div className="reading">
+                {claim.concentration ? (
+                  <>
+                    <span className="reading-value mono">
+                      {claim.concentration.value}
+                      <span className="reading-unit">{claim.concentration.unit}</span>
+                    </span>
+                    <span className="reading-word">{claim.headline}</span>
+                  </>
+                ) : (
+                  <span className="reading-word">{claim.headline}</span>
+                )}
               </div>
+
+              <details className="reading-details">
+                <summary>
+                  Details
+                  {claim.limitations.length > 0
+                    ? ` · ${claim.limitations.length} limitation${claim.limitations.length === 1 ? '' : 's'}`
+                    : ''}
+                </summary>
+                <div className="verdict-figures">
+                  <Figure
+                    label="Colour distance"
+                    value={
+                      claim.distance === null ? null : `ΔE ${claim.distance.toFixed(1)}`
+                    }
+                    absent="—"
+                    note={
+                      claim.distance !== null && claim.distance > 5
+                        ? 'A visible difference from the level it matched.'
+                        : undefined
+                    }
+                  />
+                  <Figure
+                    label="Confidence"
+                    value={
+                      claim.confidence === null
+                        ? null
+                        : `${Math.round(claim.confidence * 100)}%`
+                    }
+                    absent="Not applicable"
+                    note={
+                      claim.confidence === null
+                        ? 'A colour distance is not a probability.'
+                        : undefined
+                    }
+                  />
+                  <Figure
+                    label="Chart"
+                    value={analysis.referenceChart?.validationStatus ?? null}
+                    absent="—"
+                  />
+                </div>
+                {claim.limitations.length > 0 ? (
+                  <ul className="limits">
+                    {claim.limitations.map((limitation) => (
+                      <li key={limitation}>
+                        <Icon name="info" className="icon-sm limits-icon" />
+                        <span>{limitation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </details>
             </div>
           </Panel>
 
@@ -184,19 +219,6 @@ export function AnalysisDetail() {
             </Panel>
           ) : null}
 
-          {/* ── Limitations ─────────────────────────────────────────────── */}
-          {claim.limitations.length > 0 ? (
-            <Panel title="What limits this result">
-              <ul className="limits">
-                {claim.limitations.map((limitation) => (
-                  <li key={limitation}>
-                    <Icon name="info" className="icon-sm limits-icon" />
-                    <span>{limitation}</span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          ) : null}
         </div>
 
         {/* ── Side column ───────────────────────────────────────────────── */}
@@ -278,12 +300,6 @@ export function AnalysisDetail() {
             />
             <p className="mode-note">{modeExplanation(analysis.mode)}</p>
           </Panel>
-
-          {/* Shown whether or not a concentration exists. With none, it is
-              the clearest available answer to "the lab gave us a ppm scale,
-              so where is the ppm?" — the scale itself, marked as not
-              applied. */}
-          <InterpretationScalePanel />
 
           {!analysis.isConfirmedMeasurement ? (
             <Banner tone="caution" icon="science" title="Not a confirmed result">

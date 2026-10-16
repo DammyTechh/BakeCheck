@@ -150,3 +150,77 @@
     break-inside: avoid;
   }
 }
+
+/* ── The reading ──────────────────────────────────────────────────────────
+   One number, one word. This is the answer; everything else on the screen
+   qualifies it, so nothing else may compete with it visually. */
+.reading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s3);
+}
+
+.reading-value {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.reading-unit {
+  margin-left: var(--s2);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-soft);
+}
+
+/* The laboratory's own wording. Paired with the number, never alone, and
+   never carried by colour -- the word is the signal. */
+.reading-word {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.reading-details {
+  margin-top: var(--s4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s3);
+}
+
+.reading-details > summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-soft);
+  list-style: none;
+}
+
+.reading-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.reading-details > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: var(--s2);
+  transition: transform 120ms ease;
+}
+
+.reading-details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.reading-details > summary:hover {
+  color: var(--text);
+}
+
+.reading-details .verdict-figures {
+  margin-top: var(--s3);
+}
+
+.reading-details .limits {
+  margin-top: var(--s3);
+}

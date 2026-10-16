@@ -224,10 +224,16 @@ export interface ReferenceLevel {
   concentrationValue: number | null;
   concentrationUnit: string;
   sortOrder: number;
-  colorRgb: [number, number, number] | null;
-  labL: number | null;
-  labA: number | null;
-  labB: number | null;
+  /**
+   * Field names here mirror what the API actually sends, which is `rgb` and
+   * `lab` as arrays. They were previously declared as `colorRgb`, `labL`,
+   * `labA`, `labB` -- names the API has never used. TypeScript cannot catch
+   * that across a network boundary, so every swatch on the reference ladder
+   * rendered blank and nothing failed.
+   */
+  rgb: [number, number, number] | null;
+  lab: [number, number, number] | null;
+  labStd: number | null;
 }
 
 export interface ReferenceChart {
