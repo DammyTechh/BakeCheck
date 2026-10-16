@@ -1,0 +1,141 @@
+.ladder-measured {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  margin-bottom: var(--s4);
+}
+
+.ladder-measured-swatch {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: var(--r-control);
+  /* An inset border rather than an outline, so a pale sample still reads as
+     a swatch against the panel without a ring that implies a state. */
+  box-shadow: inset 0 0 0 1px rgba(22, 32, 42, 0.18);
+}
+
+.ladder-measured-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ladder-measured-title {
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+
+.ladder-measured-rgb {
+  font-size: var(--t-micro);
+  color: var(--text-soft);
+}
+
+.ladder-bands {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+
+.ladder-band {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ladder-band:last-child {
+  border-bottom: none;
+}
+
+/* The matched band is marked with a weight change and a left rule, not a
+   fill — a coloured background behind a colour swatch makes both harder to
+   judge, which is the one thing this component exists to let you do. */
+.ladder-band.is-matched {
+  box-shadow: inset 3px 0 0 var(--teal);
+  background: var(--teal-weak);
+}
+
+.ladder-band.is-matched .ladder-band-label {
+  font-weight: 600;
+}
+
+.ladder-band.is-runner-up {
+  box-shadow: inset 3px 0 0 var(--border-strong);
+}
+
+.ladder-swatch {
+  width: 36px;
+  height: 28px;
+  flex: none;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(22, 32, 42, 0.14);
+}
+
+.ladder-band-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ladder-band-label {
+  font-size: var(--t-small);
+}
+
+.ladder-band-conc {
+  font-size: var(--t-micro);
+  color: var(--text-soft);
+}
+
+.ladder-band-mark {
+  flex: none;
+}
+
+.ladder-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: 2px var(--s2);
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: 500;
+}
+
+.ladder-chip-match {
+  background: var(--teal);
+  color: #fff;
+}
+
+.ladder-chip-next {
+  background: var(--info-weak);
+  color: var(--text-soft);
+}
+
+.ladder-note {
+  margin-top: var(--s3);
+  font-size: var(--t-micro);
+  color: var(--text-soft);
+  max-width: var(--max-prose);
+}
+
+@media (max-width: 560px) {
+  .ladder-band {
+    flex-wrap: wrap;
+  }
+  .ladder-band-mark {
+    width: 100%;
+    padding-left: calc(36px + var(--s3));
+  }
+}

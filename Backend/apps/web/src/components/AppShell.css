@@ -1,0 +1,242 @@
+.shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.shell-bar-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--s5);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+}
+
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: none;
+}
+
+.shell-logo {
+  display: block;
+  height: 22px;
+  width: auto;
+}
+
+.shell-area {
+  padding: 1px var(--s2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  color: var(--text-soft);
+}
+
+.shell-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.shell-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.shell-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-control);
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.shell-link:hover {
+  background: var(--page);
+  color: var(--text);
+}
+
+/* The active page is marked by weight and the brand teal, not a filled
+   block — one accent colour, used for one job. */
+.shell-link.is-active {
+  color: var(--ink);
+  font-weight: 500;
+  background: var(--teal-weak);
+}
+
+.shell-end {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex: none;
+}
+
+.shell-switch {
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  text-decoration: none;
+  padding: var(--s1) var(--s2);
+  border-radius: var(--r-control);
+}
+
+.shell-switch:hover {
+  background: var(--page);
+  color: var(--text);
+}
+
+.shell-user {
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  background: none;
+  border: none;
+  padding: var(--s1) var(--s2);
+  border-radius: var(--r-control);
+  color: var(--text-soft);
+  font-size: var(--t-small);
+  cursor: pointer;
+}
+
+.shell-signout:hover {
+  background: var(--page);
+  color: var(--text);
+}
+
+.shell-main {
+  flex: 1;
+  max-width: var(--max-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--s6) var(--s5) var(--s7);
+}
+
+/* ── Page heading ────────────────────────────────────────────────────────── */
+
+.pagehead {
+  margin-bottom: var(--s5);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+  font-size: var(--t-small);
+}
+
+.crumb {
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.crumb:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.crumb + .crumb::before {
+  content: '/';
+  margin-right: var(--s2);
+  color: var(--text-faint);
+}
+
+.pagehead-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+.pagehead-desc {
+  margin-top: var(--s2);
+  color: var(--text-soft);
+}
+
+.pagehead-actions {
+  display: flex;
+  gap: var(--s2);
+  flex: none;
+}
+
+/* ── Shared layout helpers ───────────────────────────────────────────────── */
+
+.stack > * + * {
+  margin-top: var(--s4);
+}
+
+.stack-lg > * + * {
+  margin-top: var(--s5);
+}
+
+.row {
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--s5);
+  align-items: start;
+}
+
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--s4);
+}
+
+@media (max-width: 880px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shell-user {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell-bar-inner {
+    gap: var(--s3);
+    padding: 0 var(--s4);
+  }
+  .shell-main {
+    padding: var(--s5) var(--s4) var(--s6);
+  }
+  .shell-link span.icon {
+    display: none;
+  }
+  .pagehead-row {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,412 @@
+/* Primitives. Every length here comes from the spacing scale in tokens.css. */
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  border: 1px solid transparent;
+  border-radius: var(--r-control);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.btn-md {
+  padding: var(--s2) var(--s4);
+  font-size: var(--t-body);
+  min-height: 38px;
+}
+
+.btn-sm {
+  padding: var(--s1) var(--s3);
+  font-size: var(--t-small);
+  min-height: 30px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--ink-hover);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--page);
+  border-color: var(--text-faint);
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--text-soft);
+}
+.btn-quiet:hover:not(:disabled) {
+  background: var(--info-weak);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: var(--stop);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #8d2b30;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Panels ──────────────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s4) var(--s5);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: var(--t-section);
+  font-weight: 600;
+}
+
+.panel-desc {
+  margin-top: var(--s1);
+  font-size: var(--t-small);
+  color: var(--text-soft);
+}
+
+.panel-actions {
+  display: flex;
+  gap: var(--s2);
+  flex: none;
+}
+
+.panel-body {
+  padding: var(--s5);
+}
+
+/* ── Form controls ───────────────────────────────────────────────────────── */
+
+.field + .field {
+  margin-top: var(--s4);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: var(--s2);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.control {
+  width: 100%;
+  padding: var(--s2) var(--s3);
+  min-height: 38px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-control);
+  font-size: var(--t-body);
+  color: var(--text);
+}
+
+.control::placeholder {
+  color: var(--text-faint);
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--text-faint);
+}
+
+.control:disabled {
+  background: var(--page);
+  color: var(--text-soft);
+  cursor: not-allowed;
+}
+
+.control-invalid {
+  border-color: var(--stop);
+}
+
+.control-area {
+  min-height: 84px;
+  resize: vertical;
+  line-height: var(--lh-body);
+}
+
+.field-hint,
+.field-error {
+  margin-top: var(--s2);
+  font-size: var(--t-small);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s1);
+}
+
+.field-hint {
+  color: var(--text-soft);
+}
+
+.field-error {
+  color: var(--stop);
+}
+
+/* ── Pills ───────────────────────────────────────────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: 2px var(--s2);
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.pill-neutral {
+  background: var(--info-weak);
+  color: var(--text-soft);
+}
+.pill-ok {
+  background: var(--ok-weak);
+  color: var(--ok);
+}
+.pill-caution {
+  background: var(--warn-weak);
+  color: var(--warn);
+}
+.pill-stop {
+  background: var(--stop-weak);
+  color: var(--stop);
+}
+.pill-accent {
+  background: var(--teal-weak);
+  color: #05697a;
+}
+
+/* ── Banners ─────────────────────────────────────────────────────────────── */
+
+.banner {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-control);
+  border: 1px solid;
+  font-size: var(--t-small);
+  line-height: var(--lh-body);
+}
+
+.banner-neutral {
+  background: var(--info-weak);
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+.banner-accent {
+  background: var(--teal-weak);
+  border-color: #b9e3e9;
+  color: #05697a;
+}
+.banner-caution {
+  background: var(--warn-weak);
+  border-color: #f0dcb4;
+  color: var(--warn);
+}
+.banner-stop {
+  background: var(--stop-weak);
+  border-color: #f0c9cb;
+  color: var(--stop);
+}
+
+.banner-title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--s1);
+}
+
+.banner-body > * + * {
+  margin-top: var(--s2);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+.table th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-soft);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: var(--page);
+}
+
+.table-link {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.table-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Empty states ────────────────────────────────────────────────────────── */
+
+.empty {
+  padding: var(--s7) var(--s5);
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--text-faint);
+}
+
+.empty-title {
+  margin-top: var(--s3);
+  font-size: var(--t-section);
+}
+
+.empty-body {
+  margin: var(--s2) auto 0;
+  max-width: 44ch;
+  color: var(--text-soft);
+  font-size: var(--t-small);
+}
+
+.empty-action {
+  margin-top: var(--s4);
+}
+
+/* ── Definition lists ────────────────────────────────────────────────────── */
+
+.datalist {
+  margin: 0;
+}
+
+.datalist-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--t-small);
+}
+
+.datalist-row:last-child {
+  border-bottom: none;
+}
+
+.datalist dt {
+  color: var(--text-soft);
+  flex: none;
+}
+
+.datalist dd {
+  margin: 0;
+  text-align: right;
+  color: var(--text);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s5);
+  color: var(--text-soft);
+  font-size: var(--t-small);
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Two fields side by side, collapsing to one column on a narrow screen.
+ * `align-items: start` matters: without it a field whose label wraps to two
+ * lines drags its neighbour's input out of alignment with it. */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

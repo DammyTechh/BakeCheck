@@ -1,0 +1,226 @@
+.verdict-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+/* Small, plain, sentence case. Not a tracked-out all-caps eyebrow. */
+.verdict-eyebrow {
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  margin-bottom: var(--s1);
+}
+
+.verdict-headline {
+  font-size: var(--t-display);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: var(--lh-tight);
+}
+
+.verdict-qualifier {
+  margin-top: var(--s3);
+  color: var(--text-soft);
+  max-width: var(--max-prose);
+}
+
+.verdict-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s4);
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--border);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.figure-label {
+  font-size: var(--t-micro);
+  color: var(--text-soft);
+}
+
+.figure-value {
+  font-size: var(--t-title);
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* An absent figure is deliberately quieter than a present one and reads as a
+   word, so it can never be mistaken for a measured zero. */
+.figure-absent {
+  font-size: var(--t-body);
+  color: var(--text-faint);
+}
+
+.figure-note {
+  font-size: var(--t-micro);
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+/* ── Limitations ─────────────────────────────────────────────────────────── */
+
+.limits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.limits li {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  line-height: var(--lh-body);
+}
+
+.limits li + li {
+  border-top: 1px solid var(--border);
+}
+
+.limits-icon {
+  color: var(--text-faint);
+  margin-top: 2px;
+  flex: none;
+}
+
+/* ── Image panel ─────────────────────────────────────────────────────────── */
+
+.image-warnings {
+  border-top: 1px solid var(--border);
+}
+
+.image-warning {
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  font-size: var(--t-small);
+  color: var(--text-soft);
+  line-height: var(--lh-body);
+}
+
+.image-warning + .image-warning {
+  border-top: 1px solid var(--border);
+}
+
+.warn-critical {
+  color: var(--stop);
+  flex: none;
+}
+.warn-warning {
+  color: var(--warn);
+  flex: none;
+}
+.warn-info {
+  color: var(--text-faint);
+  flex: none;
+}
+
+.mode-note {
+  margin-top: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--border);
+  font-size: var(--t-micro);
+  color: var(--text-soft);
+  line-height: var(--lh-body);
+}
+
+.muted {
+  color: var(--text-soft);
+  font-size: var(--t-small);
+}
+
+@media print {
+  .shell-bar,
+  .pagehead-actions,
+  .skip-link {
+    display: none !important;
+  }
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel {
+    break-inside: avoid;
+  }
+}
+
+/* ── The reading ──────────────────────────────────────────────────────────
+   One number, one word. This is the answer; everything else on the screen
+   qualifies it, so nothing else may compete with it visually. */
+.reading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s3);
+}
+
+.reading-value {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.reading-unit {
+  margin-left: var(--s2);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-soft);
+}
+
+/* The laboratory's own wording. Paired with the number, never alone, and
+   never carried by colour -- the word is the signal. */
+.reading-word {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.reading-details {
+  margin-top: var(--s4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s3);
+}
+
+.reading-details > summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-soft);
+  list-style: none;
+}
+
+.reading-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.reading-details > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: var(--s2);
+  transition: transform 120ms ease;
+}
+
+.reading-details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.reading-details > summary:hover {
+  color: var(--text);
+}
+
+.reading-details .verdict-figures {
+  margin-top: var(--s3);
+}
+
+.reading-details .limits {
+  margin-top: var(--s3);
+}

@@ -1,0 +1,85 @@
+/* The laboratory's ppm interpretation scale.
+   Spacing uses the 4/8/12/16/24/32 scale only. */
+
+.scale-notice {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s3);
+  margin-bottom: var(--s4);
+  background: var(--info-weak);
+  border-radius: var(--r-panel);
+  color: var(--text-soft);
+}
+
+.scale-notice strong {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.scale-notice p {
+  margin: var(--s1) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.scale-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+
+/* Greyed when no measurement has been worded by it — the scale is on screen
+   as reference, and must not read as a result. */
+.scale-list-inactive {
+  color: var(--text-faint);
+}
+
+.scale-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border-top: 1px solid var(--border);
+}
+
+.scale-row:first-child {
+  border-top: 0;
+}
+
+.scale-ppm {
+  flex: 0 0 64px;
+  text-align: right;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scale-word {
+  flex: 1 1 auto;
+  font-size: 14px;
+}
+
+/* The one row a confirmed measurement landed on. Carries a word, never
+   colour alone. */
+.scale-row-match {
+  background: var(--teal-weak);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.scale-flag {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-soft);
+}
+
+.scale-provenance {
+  margin: var(--s4) 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-soft);
+}

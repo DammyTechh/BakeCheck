@@ -1,0 +1,87 @@
+/*
+ * BakeCheck design tokens.
+ *
+ * Two rules keep this interface calm, and both are enforced here rather than
+ * left to discipline at each call site:
+ *
+ *   Spacing comes from a fixed scale — 4, 8, 12, 16, 24, 32, 48. Nothing in
+ *   between. Mixed-up gaps are the single biggest reason an interface reads
+ *   as unfinished.
+ *
+ *   Colour is the brand navy and teal, taken from the BakeCheck logo itself,
+ *   plus neutrals. The three status colours exist only to carry meaning about
+ *   a result and are deliberately muted — a laboratory tool that shouts at
+ *   its user stops being read.
+ */
+
+:root {
+  /* ── Brand ─────────────────────────────────────────────────────────────
+   * Sampled from the supplied logo, not approximated. */
+  --ink: #063854;
+  --ink-hover: #0a4a6b;
+  --teal: #079baf;
+  --teal-weak: #e6f5f7;
+
+  /* ── Neutrals ──────────────────────────────────────────────────────── */
+  --page: #f6f7f8;
+  --surface: #ffffff;
+  --border: #e2e6e9;
+  --border-strong: #c9d0d6;
+  --text: #16202a;
+  --text-soft: #5a6773;
+  --text-faint: #8a949e;
+
+  /* ── Status ────────────────────────────────────────────────────────────
+   * Only ever applied to a result, a verdict or a job state. Never to
+   * decoration, and never as the sole carrier of meaning — every status pill
+   * pairs its colour with a word. */
+  --ok: #1b7f5a;
+  --ok-weak: #e7f4ef;
+  --warn: #8a5a00;
+  --warn-weak: #fdf3e2;
+  --stop: #a4343a;
+  --stop-weak: #fbeceD;
+  --info-weak: #eef2f5;
+
+  /* ── Spacing ───────────────────────────────────────────────────────── */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+
+  /* ── Radius ────────────────────────────────────────────────────────────
+   * Varies by role rather than one value everywhere: controls are tighter
+   * than the panels that contain them, which is what stops a page reading as
+   * a stack of identical cards. */
+  --r-control: 4px;
+  --r-panel: 8px;
+  --r-pill: 999px;
+
+  /* ── Type ──────────────────────────────────────────────────────────── */
+  --font: 'Archivo', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --t-display: 28px;
+  --t-title: 20px;
+  --t-section: 16px;
+  --t-body: 14px;
+  --t-small: 13px;
+  --t-micro: 12px;
+
+  --lh-tight: 1.25;
+  --lh-body: 1.55;
+
+  /* ── Depth ─────────────────────────────────────────────────────────────
+   * Borders carry structure; shadow is reserved for things that genuinely
+   * float above the page, so it keeps meaning. */
+  --lift: 0 1px 2px rgba(22, 32, 42, 0.06);
+  --float: 0 8px 24px rgba(22, 32, 42, 0.12);
+
+  --focus: 0 0 0 3px rgba(7, 155, 175, 0.35);
+
+  --max-width: 1120px;
+  --max-prose: 62ch;
+}

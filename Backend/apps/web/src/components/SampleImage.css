@@ -1,0 +1,31 @@
+.sample-image {
+  display: block;
+  width: 100%;
+  /* Tubes are photographed portrait; a fixed ratio keeps the panel stable
+     while the image loads instead of the page jumping when it arrives. */
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  background: var(--page);
+}
+
+.sample-image.is-loading {
+  background: linear-gradient(90deg, var(--page) 25%, #eef0f2 50%, var(--page) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.sample-image.is-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  color: var(--text-faint);
+  font-size: var(--t-small);
+}

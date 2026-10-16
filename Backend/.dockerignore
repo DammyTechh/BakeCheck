@@ -28,7 +28,11 @@ coverage
 .pytest_cache
 services/ai/artifacts
 services/ai/data
-apps/web/.vercel
+# The frontend. Deployed by Vercel from apps/web, never built by Docker --
+# neither Dockerfile COPYs it. In a single repository serving both targets it
+# would otherwise be uploaded into the backend build context on every Render
+# deploy for nothing.
+apps/web
 docs
 *.md
 !README.md

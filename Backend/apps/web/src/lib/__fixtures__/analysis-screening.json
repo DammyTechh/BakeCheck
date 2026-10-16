@@ -1,0 +1,119 @@
+{
+  "id": "11111111-1111-4111-8111-111111111111",
+  "sampleId": "22222222-2222-4222-8222-222222222222",
+  "sampleCode": "BRD-0001",
+  "sampleImageId": "33333333-3333-4333-8333-333333333333",
+  "laboratoryId": "44444444-4444-4444-8444-444444444444",
+  "status": "COMPLETED",
+  "mode": "REFERENCE_MATCHING",
+  "testMethod": {
+    "id": "454e10ae-2659-4c73-9219-2fa3cd019550",
+    "code": "BROMATE-COLOUR-SCREEN",
+    "name": "Colorimetric bromate screening (prototype)",
+    "version": "0.1.0-prototype",
+    "targetAnalyte": "potassium bromate (reported as BrO3-)",
+    "validationStatus": "DRAFT"
+  },
+  "referenceChart": {
+    "id": "9eb50108-593a-4613-adc0-c574ea8e4877",
+    "name": "Illustrative bromate colour ladder",
+    "version": 1,
+    "validationStatus": "ILLUSTRATIVE"
+  },
+  "prediction": {
+    "referenceLevelId": "1adf3ee0-b0e9-4f11-a4f1-8d9f421306da",
+    "label": "Very High",
+    "referenceConcentration": 10,
+    "referenceUnit": "ppm",
+    "referenceColorRgb": [
+      2,
+      5,
+      112
+    ],
+    "estimatedConcentration": null,
+    "concentrationUnit": null,
+    "confidence": null,
+    "colorDistance": 11.7502,
+    "alternatives": [
+      {
+        "label": "High",
+        "colorDistance": 13.1953,
+        "referenceLevelId": "009682fe-7828-4bf0-afc1-1b61e1f61ef6",
+        "concentrationValue": 5
+      },
+      {
+        "label": "Moderately High",
+        "colorDistance": 37.3469,
+        "referenceLevelId": "58916ca5-aab9-45d5-9e00-83175ba63d79",
+        "concentrationValue": 1
+      },
+      {
+        "label": "Moderate",
+        "colorDistance": 66.5337,
+        "referenceLevelId": "88e9d21f-3505-47cc-88fb-3045f9174721",
+        "concentrationValue": 0.5
+      }
+    ],
+    "outOfRange": false
+  },
+  "imageQuality": {
+    "verdict": "USABLE",
+    "score": 0.95,
+    "warnings": [
+      {
+        "code": "missing_calibration",
+        "message": "No colour reference was present in the frame, so the image could not be corrected for the light source. Colour values are device- and lighting-dependent.",
+        "severity": "info",
+        "threshold": null,
+        "measuredValue": null
+      }
+    ]
+  },
+  "measuredColor": {
+    "rgbMedian": [
+      17,
+      32,
+      71
+    ],
+    "labMedian": [
+      13.591,
+      10.677,
+      -28.5997
+    ],
+    "roi": {
+      "x": 252,
+      "y": 211,
+      "width": 58,
+      "height": 252,
+      "mode": "AUTO_TUBE_DETECTION"
+    }
+  },
+  "model": {
+    "name": "baseline-color-analysis",
+    "version": "0.1.0",
+    "validated": false,
+    "pipelineVersion": "0.1.0"
+  },
+  "isConfirmedMeasurement": false,
+  "confirmedMeasurementCount": 0,
+  "limitations": [
+    "This is an image-based screening estimate, not a chemically confirmed measurement. It must not be used on its own to declare a sample safe, unsafe, compliant or non-compliant.",
+    "Produced by colour-distance matching against reference levels. No trained predictive model was used, and no concentration was estimated.",
+    "The test method \"BROMATE-COLOUR-SCREEN\" has validation status DRAFT. No limit of detection, calibration curve or measurement uncertainty has been established for it in this system.",
+    "Reference chart \"Illustrative bromate colour ladder\" is marked ILLUSTRATIVE: its colours were read from a picture rather than measured from prepared standards. It establishes no validated relationship between colour and potassium bromate (reported as BrO3-) concentration.",
+    "Model \"baseline-color-analysis\" v0.1.0 has not been validated against confirmed laboratory measurements.",
+    "Not a trained model: computes a CIEDE2000 distance between the measured colour and each reference level.",
+    "Returns no concentration estimate and no confidence value, because neither is supported by a colour distance alone.",
+    "Accuracy depends entirely on the reference chart's own validity, the imaging conditions and the sample preparation.",
+    "\"Very High Level\" and \"High Level\" are nearly equidistant from the measured colour (\u0394E 11.75 vs 13.20). The match between them is not supported by this measurement.",
+    "Test method BROMATE-COLOUR-SCREEN has validation status DRAFT.",
+    "The reference chart used is not a validated reference (status: ILLUSTRATIVE).",
+    "Confirm any actionable result with a validated analytical method and record it under laboratory measurements."
+  ],
+  "errorCode": null,
+  "errorMessage": null,
+  "correlationId": "55555555-5555-4555-8555-555555555555",
+  "durationMs": 170,
+  "createdAt": "2026-10-15T12:01:38.103Z",
+  "completedAt": "2026-10-15T12:01:38.278Z"
+}
