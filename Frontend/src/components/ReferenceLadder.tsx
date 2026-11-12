@@ -15,6 +15,7 @@
  */
 import type { ReferenceCandidate } from '../lib/types';
 import './ReferenceLadder.css';
+import { formatConcentration } from '../lib/format';
 
 export interface LadderBand {
   id: string;
@@ -97,7 +98,7 @@ export function ReferenceLadder({
                 <span className="mono ladder-band-conc">
                   {band.concentrationValue === null
                     ? '—'
-                    : `${band.concentrationValue} ${unit}`}
+                    : `${formatConcentration(band.concentrationValue)} ${unit}`}
                 </span>
               </div>
               <div className="ladder-band-mark">

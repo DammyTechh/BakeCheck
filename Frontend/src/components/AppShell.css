@@ -231,12 +231,74 @@
     padding: 0 var(--s4);
   }
   .shell-main {
-    padding: var(--s5) var(--s4) var(--s6);
-  }
-  .shell-link span.icon {
-    display: none;
+    /* Bottom padding clears the tab bar plus the home indicator. */
+    padding: var(--s5) var(--s4) calc(var(--s6) + 64px + env(safe-area-inset-bottom, 0px));
   }
   .pagehead-row {
     flex-direction: column;
+  }
+
+  /* ── Navigation moves to the bottom on a phone ────────────────────────
+     The top nav is a horizontally scrolling strip with the scrollbar
+     hidden. At 390px that put "Results" at x=463 and "Settings" at x=567:
+     both entirely off-screen, with nothing on screen to suggest they
+     existed. The nav scrolled, but a technician had no way to know, so
+     two of the four destinations were simply unreachable on a phone.
+
+     A bottom tab bar fixes the discovery problem rather than the
+     measurement: every destination is visible at once and within thumb
+     reach, which is how this is actually held in a laboratory. */
+  .shell-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    /* Clears the iOS home indicator. */
+    padding: var(--s1) var(--s2) calc(var(--s1) + env(safe-area-inset-bottom, 0px));
+    gap: 0;
+    overflow-x: visible;
+    justify-content: space-around;
+  }
+
+  .shell-link {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--s2) var(--s1);
+    justify-content: center;
+    text-align: center;
+    font-size: var(--t-micro);
+    /* Comfortably tappable, and the same height whether or not a label
+       wraps. */
+    min-height: 48px;
+  }
+
+  /* The icon carries the tab at this size, so it comes back. */
+  .shell-link span.icon {
+    display: inline-flex;
+  }
+
+  .shell-link.is-active {
+    background: none;
+    color: var(--teal-strong, var(--ink));
+    font-weight: 600;
+  }
+}
+
+/* A table is the one thing that legitimately cannot shrink: the columns
+   carry meaning. It scrolls inside its own box rather than pushing the
+   page sideways -- at 390px the results table was 390px wide inside a
+   padded panel, so it overflowed its parent and dragged the whole
+   document with it. */
+@media (max-width: 640px) {
+  .table-wrap,
+  .panel-body > .table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
