@@ -21,9 +21,7 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, alias="AI_PORT")
     log_level: str = Field(default="INFO", alias="AI_LOG_LEVEL")
 
-    # Shared secret the Node API presents as `x-internal-key`. There is no
-    # default: the service refuses to start without one, because an internal
-    # service that accepts unauthenticated calls is worse than one that is down.
+
     internal_key: str = Field(alias="AI_INTERNAL_KEY", min_length=16)
 
     # FastAPI's own docs. Useful in development, closed in production — these
