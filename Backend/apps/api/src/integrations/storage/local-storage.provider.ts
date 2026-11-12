@@ -82,4 +82,22 @@ export class LocalStorageProvider implements StorageProvider {
   async createSignedUrl(): Promise<string | null> {
     return null;
   }
+
+  /**
+   * Local disk is usable when the directory can be written to. The real value
+   * here is the production warning: Render's filesystem is ephemeral, so this
+   * driver silently loses every uploaded image on redeploy.
+   */
+  async check(): Promise<{ ok: boolean; reason: string | null }> {
+    const probe = join(this.root, '.write-probe');
+    try {
+      await mkdir(this.root, { recursive: true });
+      await writeFile(probe, 'probe');
+      await unlink(probe).catch(() => undefined);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { ok: false, reason: `Cannot write to ${this.root}: ${message}` };
+    }
+    return { ok: true, reason: null };
+  }
 }

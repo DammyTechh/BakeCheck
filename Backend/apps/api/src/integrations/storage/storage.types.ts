@@ -33,6 +33,18 @@ export interface StorageProvider {
    * the authenticated download endpoint.
    */
   createSignedUrl(key: string, ttlSeconds: number): Promise<string | null>;
+
+  /**
+   * Confirms the backing store is actually usable, without writing anything.
+   *
+   * This exists because a misconfigured bucket used to surface as a 502 on a
+   * technician's first upload, hours after the deploy, with Supabase's own
+   * body being an unhelpful `{"statusCode":"500","error":"Internal"}`. The
+   * check runs from /health/ready instead, so the deploy reports it.
+   *
+   * Returns a reason when unusable, or null when fine.
+   */
+  check(): Promise<{ ok: boolean; reason: string | null }>;
 }
 
 export const STORAGE_PROVIDER = 'STORAGE_PROVIDER';

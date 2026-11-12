@@ -26,7 +26,7 @@ import {
   Spinner,
 } from '../components/ui';
 import { SampleImage } from '../components/SampleImage';
-import { formatDateTime } from '../lib/format';
+import { formatConcentration, formatDateTime } from '../lib/format';
 import './AnalysisDetail.css';
 
 export function AnalysisDetail() {
@@ -126,7 +126,7 @@ export function AnalysisDetail() {
                 {claim.concentration ? (
                   <>
                     <span className="reading-value mono">
-                      {claim.concentration.value}
+                      {formatConcentration(claim.concentration.value)}
                       <span className="reading-unit">{claim.concentration.unit}</span>
                     </span>
                     <span className="reading-word">{claim.headline}</span>

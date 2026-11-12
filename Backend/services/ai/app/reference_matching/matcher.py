@@ -214,67 +214,17 @@ def _is_outside_ladder(
     return t < -0.10 or t > 1.10
 
 
-def interpolate_concentration(
-    measured_lab: np.ndarray,
-    levels: list[ReferenceLevel],
-) -> float | None:
-    """
-    Estimate a concentration by interpolating between the two nearest levels.
+# `interpolate_concentration` was removed on 12 November 2026.
+#
+# It estimated a concentration between two levels, which meant a float -- and
+# this chart is sixteen discrete categories from the laboratory's reporting
+# scale (0, 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500,
+# 1000 ppm). "412.37 ppm" is not a reading this chart can produce; the nearest
+# category is. The function was never called, but it sat here as the obvious
+# thing to reach for and would have reintroduced exactly that.
+#
+# If a validated chart with calibrated colours ever makes interpolation
+# correct, it belongs behind an explicit validated-chart check, not as a
+# free function anyone can call. test_matcher_integer_ppm.py fails if a
+# non-integer or off-scale concentration is ever returned.
 
-    **This is not called by the prototype pipeline.** It exists because the
-    infrastructure for it is required, and because the moment a laboratory
-    produces a validated chart with calibrated colours, this becomes the right
-    function to use.
-
-    It returns None unless the measured colour genuinely sits between two
-    levels along the ladder, so it cannot manufacture a number by
-    extrapolating past the ends.
-
-    A caller must not present this value as a measurement unless the method,
-    the chart and the model have all been validated — the colour-to-
-    concentration relationship it assumes (locally linear in Lab) is an
-    assumption about the chemistry, not a fact this code can establish.
-    """
-    if len(levels) < 2:
-        return None
-
-    with_concentration = [
-        level for level in levels if level.concentration_value is not None
-    ]
-    if len(with_concentration) < 2:
-        return None
-
-    measured = np.asarray(measured_lab, dtype=np.float64).reshape(3)
-    ordered = sorted(with_concentration, key=lambda level: level.sort_order)
-
-    best: tuple[float, float] | None = None  # (distance to segment, estimate)
-
-    for lower, upper in zip(ordered, ordered[1:], strict=False):
-        segment = upper.lab - lower.lab
-        segment_length_sq = float(segment @ segment)
-        if segment_length_sq < 1e-9:
-            continue
-
-        t = float((measured - lower.lab) @ segment) / segment_length_sq
-        if not 0.0 <= t <= 1.0:
-            continue
-
-        projected = lower.lab + t * segment
-        distance = float(np.linalg.norm(measured - projected))
-
-        # Bound to local floats before arithmetic. The list comprehension
-        # above already filtered out None concentrations, but that fact is
-        # invisible to the type checker — and if the filter is ever loosened,
-        # this would silently become a TypeError at runtime rather than a
-        # caught error here.
-        lower_value = lower.concentration_value
-        upper_value = upper.concentration_value
-        if lower_value is None or upper_value is None:
-            continue
-
-        estimate = lower_value + t * (upper_value - lower_value)
-
-        if best is None or distance < best[0]:
-            best = (distance, float(estimate))
-
-    return round(best[1], 6) if best is not None else None

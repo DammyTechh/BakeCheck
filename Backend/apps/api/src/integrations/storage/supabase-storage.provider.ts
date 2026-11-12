@@ -71,8 +71,25 @@ export class SupabaseStorageProvider implements StorageProvider {
 
     if (!response.ok) {
       const detail = await response.text().catch(() => '');
+      // Supabase answers a missing bucket with
+      // {"statusCode":"500","error":"Internal","message":"Internal Server
+      // Error"} -- which names neither the bucket nor the cause. Log what we
+      // actually sent, so the next person does not have to guess.
       this.logger.error(
-        { status: response.status, detail: detail.slice(0, 300) },
+        {
+          status: response.status,
+          bucket: this.bucket,
+          key,
+          baseUrl: this.baseUrl,
+          detail: detail.slice(0, 300),
+          hint:
+            response.status >= 500
+              ? `Supabase returned a server error. The usual cause is that ` +
+                `the bucket "${this.bucket}" does not exist in the project ` +
+                `at ${this.baseUrl}. Check GET /health/ready, which reports ` +
+                `this directly.`
+              : undefined,
+        },
         'Supabase storage upload failed',
       );
       throw new ApiError(
@@ -152,5 +169,77 @@ export class SupabaseStorageProvider implements StorageProvider {
 
     // Supabase returns a path relative to /storage/v1.
     return `${this.baseUrl.replace(/\/+$/, '')}/storage/v1${body.signedURL}`;
+  }
+
+  /**
+   * Confirms the bucket exists and the key is accepted, writing nothing.
+   *
+   * `GET /bucket/{name}` is the cheapest call that distinguishes the three
+   * ways this goes wrong, which the upload endpoint cannot: it answers 404
+   * when the bucket is missing, 401/403 when the key is wrong, and 200 when
+   * both are fine. An upload against a missing bucket answers
+   * `{"statusCode":"500","error":"Internal"}`, which says none of that.
+   */
+  async check(): Promise<{ ok: boolean; reason: string | null }> {
+    let response: Response;
+    try {
+      response = await this.request(this.endpoint(`bucket/${this.bucket}`), {
+        method: 'GET',
+        headers: this.headers(),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        ok: false,
+        reason:
+          `Could not reach Supabase at ${this.baseUrl} (${message}). Check ` +
+          'SUPABASE_URL is the project URL, with no trailing path.',
+      };
+    }
+
+    if (response.status === 404) {
+      return {
+        ok: false,
+        reason:
+          `The bucket "${this.bucket}" does not exist in this Supabase ` +
+          'project. Create it under Storage → New bucket, keep it PRIVATE, ' +
+          'and make the name match SUPABASE_STORAGE_BUCKET exactly.',
+      };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        ok: false,
+        reason:
+          'Supabase rejected the credentials. SUPABASE_SERVICE_ROLE_KEY must ' +
+          'be the service_role key (not the anon key) for the project at ' +
+          `${this.baseUrl}, and must not have been rotated since it was set.`,
+      };
+    }
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      return {
+        ok: false,
+        reason:
+          `Supabase answered ${response.status} for bucket "${this.bucket}": ` +
+          detail.slice(0, 200),
+      };
+    }
+
+    // A public bucket would let anyone with a URL read laboratory images.
+    const body = (await response.json().catch(() => null)) as {
+      public?: boolean;
+    } | null;
+    if (body?.public === true) {
+      return {
+        ok: false,
+        reason:
+          `The bucket "${this.bucket}" is PUBLIC. Laboratory images must not ` +
+          'be world-readable; set it to private in Supabase.',
+      };
+    }
+
+    return { ok: true, reason: null };
   }
 }

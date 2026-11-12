@@ -65,6 +65,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: request.originalUrl,
       status,
       code,
+      // The field-level reason, SERVER-SIDE ONLY.
+      //
+      // `details` is stripped from the response body in production on
+      // purpose: it names columns and constraints, and a client has no
+      // business seeing them. But it was being dropped from the log too,
+      // which left `code: 'VALIDATION_FAILED'` and nothing else -- a 400
+      // that says a request was wrong without saying what was wrong with
+      // it. The log is ours; it gets the detail.
+      details: details ?? undefined,
     };
 
     if (logAsError) {

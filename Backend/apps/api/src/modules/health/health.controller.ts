@@ -5,6 +5,10 @@ import { Response } from 'express';
 import { AppConfig, CONFIG_TOKEN } from '../../config/configuration';
 import { Public } from '../../common/decorators';
 import { DatabaseService } from '../../database/database.service';
+import {
+  STORAGE_PROVIDER,
+  StorageProvider,
+} from '../../integrations/storage/storage.types';
 import { AiClientService } from '../../integrations/python-ai/ai-client.service';
 import { HealthDocs } from '../../swagger/docs/health.docs';
 import { EmailService } from '../email/email.service';
@@ -42,6 +46,7 @@ export class HealthController {
   constructor(
     private readonly db: DatabaseService,
     private readonly aiClient: AiClientService,
+    @Inject(STORAGE_PROVIDER) private readonly storage: StorageProvider,
     private readonly emailService: EmailService,
     @Inject(CONFIG_TOKEN) private readonly config: AppConfig,
   ) {}
@@ -64,9 +69,16 @@ export class HealthController {
   @Get('health/ready')
   @HealthDocs.readiness()
   async readiness(@Res() response: Response): Promise<void> {
-    const [database, aiService] = await Promise.all([
+    const [database, aiService, storage] = await Promise.all([
       this.db.healthCheck(),
       this.aiClient.isHealthy(),
+      // A misconfigured bucket used to surface as a 502 on a technician's
+      // first upload, long after the deploy looked healthy. It shows up
+      // here instead, with the reason spelled out.
+      this.storage.check().catch((error: unknown) => ({
+        ok: false,
+        reason: error instanceof Error ? error.message : String(error),
+      })),
     ]);
 
     const email = this.emailService.getStatus();
@@ -78,8 +90,17 @@ export class HealthController {
     const ready = database;
 
     response.status(ready ? 200 : 503).json({
-      status: database && aiService ? 'ok' : 'degraded',
-      checks: { database, aiService, email },
+      status: database && aiService && storage.ok ? 'ok' : 'degraded',
+      checks: {
+        database,
+        aiService,
+        email,
+        storage: storage.ok,
+        // Null when storage is fine. When it is not, this is the one line
+        // that says what to change, rather than Supabase's own
+        // {"statusCode":"500","error":"Internal"}.
+        storageReason: storage.reason,
+      },
       timestamp: new Date().toISOString(),
     });
   }
