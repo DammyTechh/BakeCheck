@@ -1,17 +1,24 @@
-# Render resolves every path in this file from the REPOSITORY ROOT, not from
-# the directory this file sits in. This repository keeps the backend under
-# Backend/ and the frontend under Frontend/, so each path below carries that
-# prefix. Without it the deploy fails during checkout, before any build:
+# Render resolves every path in this file from the REPOSITORY ROOT, and the
+# backend therefore lives AT the repository root: apps/, services/, database/
+# and this file are all top level. The React frontend is the one thing kept in
+# a subdirectory (Frontend/), because Vercel is pointed at it with a Root
+# Directory setting, which Render has no equivalent of.
+#
+# This layout is not cosmetic. The backend spent two days failing to deploy
+# while it sat under Backend/:
 #
 #   error: invalid local: resolve : lstat /opt/render/project/src/apps:
 #   no such file or directory
 #
-# dockerContext is ./Backend because the Dockerfiles COPY package.json,
-# apps/api and database relative to the context, and .dockerignore must sit
-# at the context root -- it is at Backend/.dockerignore.
+# Prefixing the paths here with Backend/ did NOT fix it: these services are
+# Blueprint managed, Render had already stored the root-relative paths, and it
+# does not re-read this file on an ordinary push. Moving the code to where
+# Render was already looking is what fixed it, and it needs no dashboard
+# change and no blueprint resync.
 #
-# If the backend is ever moved to the repository root, strip the Backend/
-# prefix from all four paths below.
+# So: do not move the backend back into a subdirectory. If it ever has to
+# move, the Blueprint must be disconnected and recreated, not just edited
+# here.
 # ─────────────────────────────────────────────────────────────────────────────
 # BreadGuard AI — Render blueprint
 #
@@ -52,8 +59,8 @@ services:
     name: breadguard-ai-service
     runtime: docker
     plan: standard            # OpenCV needs the memory; starter is too small
-    dockerfilePath: ./Backend/services/ai/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./services/ai/Dockerfile
+    dockerContext: .
     region: frankfurt
     branch: main
     autoDeploy: true
@@ -88,8 +95,8 @@ services:
     name: breadguard-api
     runtime: docker
     plan: starter
-    dockerfilePath: ./Backend/apps/api/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
     region: frankfurt          # same region as the database and AI service
     branch: main
     autoDeploy: true
@@ -202,8 +209,8 @@ services:
     name: breadguard-migrate
     runtime: docker
     plan: starter
-    dockerfilePath: ./Backend/apps/api/Dockerfile
-    dockerContext: ./Backend
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
     region: frankfurt
     branch: main
     # 31 February never occurs, so this never fires on its own. The job exists
