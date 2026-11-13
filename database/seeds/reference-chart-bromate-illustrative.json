@@ -1,7 +1,7 @@
 {
-  "source_image": "interpolated from IMG_1212.PNG",
+  "source_image": "prepared-standards-2026-11-13/<ppm>.jpg",
   "illuminant": "D65",
-  "provenance_note": "The sixteen concentrations and their wording are the laboratory's own reporting scale, supplied on 16 October 2026, and are recorded here verbatim. The COLOURS are not measured. No prepared standard has been photographed, so the six colours sampled from an AI-generated chart illustration were interpolated across the sixteen levels in CIELAB and spread by ladder position, because the ppm steps are uneven and no relationship between colour and concentration has been established. A ppm read off this chart is therefore the printed value of the nearest colour on an illustrative ladder, not a measurement. To make it one: photograph the sixteen prepared standards under controlled lighting, run infrastructure/scripts/extract_reference_colors.py over the photograph, and mark the chart VALIDATED.",
+  "provenance_note": "Measured from photographs of fifteen prepared standards of known concentration, supplied by the laboratory on 13 November 2026. These replace colours that were interpolated from an illustration: the concentration of every level is now backed by a prepared standard, which is what the chart was missing. It is still marked ILLUSTRATIVE, and the reason is the photography, not the chemistry. The fifteen shots were taken at different times, by different hands, under different light, with no grey card or colour reference in any frame. Each was white balanced against the sheet of paper behind the tube, which is the only reference available and is a partial correction, not a calibration. The consequence is measurable and is recorded per level in separation_note: four steps are non-monotonic, where a higher concentration photographed LIGHTER than the one below it, and three adjacent pairs sit within dE2000 5 of each other, which is close to indistinguishable. Both are consistent with lighting variation between shots rather than with the dilution series. To make this VALIDATED: re-photograph all sixteen standards in one session, one camera, fixed lighting, with a grey card in every frame, and include 450 ppm.",
   "levels": [
     {
       "sort_order": 0,
@@ -9,17 +9,22 @@
       "concentration_value": 0,
       "concentration_unit": "ppm",
       "rgb": [
-        240,
-        240,
-        240
+        191,
+        193,
+        192
       ],
       "lab": [
-        94.7962,
-        -0.0,
-        0.0
+        77.888,
+        -0.8777,
+        0.2588
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 0.646,
+      "roi": {
+        "x": 311,
+        "y": 523,
+        "width": 33,
+        "height": 65
+      }
     },
     {
       "sort_order": 1,
@@ -27,17 +32,22 @@
       "concentration_value": 10,
       "concentration_unit": "ppm",
       "rgb": [
-        231,
-        239,
-        241
+        120,
+        130,
+        160
       ],
       "lab": [
-        93.8364,
-        -2.0934,
-        -2.1793
+        54.5492,
+        3.2377,
+        -17.2085
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 8.211,
+      "roi": {
+        "x": 354,
+        "y": 573,
+        "width": 20,
+        "height": 34
+      }
     },
     {
       "sort_order": 2,
@@ -45,17 +55,22 @@
       "concentration_value": 20,
       "concentration_unit": "ppm",
       "rgb": [
-        222,
-        237,
-        243
+        81,
+        100,
+        153
       ],
       "lab": [
-        92.8766,
-        -4.1868,
-        -4.3587
+        43.0075,
+        7.806,
+        -31.1651
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 7.602,
+      "roi": {
+        "x": 422,
+        "y": 637,
+        "width": 36,
+        "height": 62
+      }
     },
     {
       "sort_order": 3,
@@ -63,17 +78,22 @@
       "concentration_value": 30,
       "concentration_unit": "ppm",
       "rgb": [
-        212,
-        236,
-        244
+        92,
+        104,
+        145
       ],
       "lab": [
-        91.9168,
-        -6.2801,
-        -6.538
+        44.5464,
+        6.0254,
+        -23.9402
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 6.204,
+      "roi": {
+        "x": 340,
+        "y": 724,
+        "width": 43,
+        "height": 73
+      }
     },
     {
       "sort_order": 4,
@@ -81,17 +101,22 @@
       "concentration_value": 40,
       "concentration_unit": "ppm",
       "rgb": [
-        185,
-        226,
-        245
+        80,
+        101,
+        177
       ],
       "lab": [
-        87.6883,
-        -9.3661,
-        -13.5964
+        44.4985,
+        14.7033,
+        -42.9788
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 11.249,
+      "roi": {
+        "x": 368,
+        "y": 514,
+        "width": 29,
+        "height": 47
+      }
     },
     {
       "sort_order": 5,
@@ -99,17 +124,22 @@
       "concentration_value": 50,
       "concentration_unit": "ppm",
       "rgb": [
-        155,
-        217,
-        246
+        19,
+        14,
+        163
       ],
       "lab": [
-        83.4597,
-        -12.452,
-        -20.6547
+        20.4242,
+        52.9229,
+        -74.0336
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 10.102,
+      "roi": {
+        "x": 388,
+        "y": 590,
+        "width": 33,
+        "height": 52
+      }
     },
     {
       "sort_order": 6,
@@ -117,17 +147,22 @@
       "concentration_value": 100,
       "concentration_unit": "ppm",
       "rgb": [
-        120,
-        207,
-        247
+        21,
+        14,
+        145
       ],
       "lab": [
-        79.2311,
-        -15.538,
-        -27.713
+        17.9961,
+        47.7397,
+        -66.9973
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 4.383,
+      "roi": {
+        "x": 339,
+        "y": 556,
+        "width": 31,
+        "height": 52
+      }
     },
     {
       "sort_order": 7,
@@ -135,17 +170,22 @@
       "concentration_value": 150,
       "concentration_unit": "ppm",
       "rgb": [
-        98,
-        181,
-        245
+        23,
+        30,
+        111
       ],
       "lab": [
-        71.1288,
-        -6.7212,
-        -39.4205
+        16.7868,
+        27.918,
+        -47.3976
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 7.22,
+      "roi": {
+        "x": 382,
+        "y": 572,
+        "width": 29,
+        "height": 48
+      }
     },
     {
       "sort_order": 8,
@@ -153,17 +193,22 @@
       "concentration_value": 200,
       "concentration_unit": "ppm",
       "rgb": [
-        69,
-        156,
-        243
+        34,
+        50,
+        123
       ],
       "lab": [
-        63.0265,
-        2.0957,
-        -51.1279
+        23.8387,
+        20.1905,
+        -43.531
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 9.909,
+      "roi": {
+        "x": 406,
+        "y": 512,
+        "width": 30,
+        "height": 53
+      }
     },
     {
       "sort_order": 9,
@@ -171,17 +216,22 @@
       "concentration_value": 250,
       "concentration_unit": "ppm",
       "rgb": [
-        1,
-        132,
-        241
+        52,
+        64,
+        101
       ],
       "lab": [
-        54.9243,
-        10.9125,
-        -62.8354
+        27.6717,
+        6.2943,
+        -23.2982
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 10.37,
+      "roi": {
+        "x": 335,
+        "y": 563,
+        "width": 24,
+        "height": 41
+      }
     },
     {
       "sort_order": 10,
@@ -189,17 +239,22 @@
       "concentration_value": 300,
       "concentration_unit": "ppm",
       "rgb": [
-        16,
-        100,
-        212
+        20,
+        34,
+        56
       ],
       "lab": [
-        44.2734,
-        20.1442,
-        -63.7356
+        13.0967,
+        2.0313,
+        -16.1097
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 9.685,
+      "roi": {
+        "x": 393,
+        "y": 507,
+        "width": 17,
+        "height": 33
+      }
     },
     {
       "sort_order": 11,
@@ -207,17 +262,22 @@
       "concentration_value": 350,
       "concentration_unit": "ppm",
       "rgb": [
-        14,
-        69,
-        184
+        57,
+        65,
+        94
       ],
       "lab": [
-        33.6226,
-        29.3759,
-        -64.6358
+        28.0027,
+        4.8634,
+        -18.2485
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 8.854,
+      "roi": {
+        "x": 329,
+        "y": 620,
+        "width": 19,
+        "height": 35
+      }
     },
     {
       "sort_order": 12,
@@ -225,71 +285,68 @@
       "concentration_value": 400,
       "concentration_unit": "ppm",
       "rgb": [
-        1,
-        38,
-        156
+        31,
+        43,
+        67
       ],
       "lab": [
-        22.9717,
-        38.6075,
-        -65.5359
+        17.5721,
+        2.8262,
+        -16.7077
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 10.388,
+      "roi": {
+        "x": 405,
+        "y": 632,
+        "width": 23,
+        "height": 43
+      }
     },
     {
       "sort_order": 13,
-      "label": "Very Severe",
-      "concentration_value": 450,
-      "concentration_unit": "ppm",
-      "rgb": [
-        2,
-        28,
-        141
-      ],
-      "lab": [
-        19.0517,
-        39.3299,
-        -62.7991
-      ],
-      "lab_std": 0.0,
-      "roi": null
-    },
-    {
-      "sort_order": 14,
       "label": "Intense",
       "concentration_value": 500,
       "concentration_unit": "ppm",
       "rgb": [
-        3,
-        17,
-        126
+        34,
+        51,
+        70
       ],
       "lab": [
-        15.1317,
-        40.0522,
-        -60.0623
+        20.6339,
+        -0.7969,
+        -13.9708
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 6.297,
+      "roi": {
+        "x": 352,
+        "y": 630,
+        "width": 19,
+        "height": 38
+      }
     },
     {
-      "sort_order": 15,
+      "sort_order": 14,
       "label": "Extremely High",
       "concentration_value": 1000,
       "concentration_unit": "ppm",
       "rgb": [
-        2,
-        5,
-        112
+        4,
+        8,
+        19
       ],
       "lab": [
-        11.2116,
-        40.7745,
-        -57.3255
+        2.2264,
+        0.8249,
+        -5.4606
       ],
-      "lab_std": 0.0,
-      "roi": null
+      "lab_std": 5.614,
+      "roi": {
+        "x": 314,
+        "y": 515,
+        "width": 33,
+        "height": 62
+      }
     }
   ]
 }

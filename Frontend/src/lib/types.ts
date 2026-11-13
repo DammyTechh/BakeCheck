@@ -160,7 +160,19 @@ export interface Analysis {
   measuredColor: {
     rgbMedian: [number, number, number] | null;
     labMedian: [number, number, number] | null;
-    roi: { x: number; y: number; width: number; height: number } | null;
+    roi: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      /**
+       * How the measured region was chosen. CENTER_FALLBACK means the tube
+       * was not found and the middle of the frame was measured instead --
+       * which on these photographs is the sheet of paper behind the tube,
+       * so no band may be read from it.
+       */
+      mode: 'AUTO_TUBE_DETECTION' | 'MANUAL_SELECTION' | 'CENTER_FALLBACK';
+    } | null;
   } | null;
   model: {
     name: string | null;

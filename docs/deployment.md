@@ -139,7 +139,7 @@ out of rotation for a partial outage.
 ```bash
 # Project settings
 Framework preset:  Vite
-Root directory:    apps/web
+Root directory:    Frontend
 Build command:     npm run build
 Output directory:  dist
 Install command:   npm install

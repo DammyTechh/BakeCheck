@@ -75,6 +75,14 @@ function sentenceList(items: string[]): string[] {
   return [...new Set(items.filter((s) => s.trim().length > 0))];
 }
 
+/**
+ * Beyond this CIEDE2000 distance the measured colour is not on the chart,
+ * and the nearest level is not a reading. Kept equal to
+ * MAX_PLAUSIBLE_DISTANCE in services/ai/app/reference_matching/matcher.py;
+ * claims.test.ts pins the value so the two cannot drift apart silently.
+ */
+export const MAX_PLAUSIBLE_DISTANCE = 12.0;
+
 export function analysisClaim(analysis: Analysis): Claim {
   const { prediction, imageQuality, testMethod, referenceChart, model } = analysis;
   const limitations = sentenceList(analysis.limitations);
@@ -148,8 +156,27 @@ export function analysisClaim(analysis: Analysis): Claim {
   //
   // `estimatedConcentration` is a different thing: a validated model's own
   // estimate. It is preferred when present, and is null for colour matching.
-  const concentration =
-    prediction.estimatedConcentration !== null && prediction.concentrationUnit
+  // The tube was never located, so the colour that was measured may be the
+  // sheet of paper behind it rather than the solution. A number here would
+  // be a reading of the background presented exactly like a real one, so
+  // there is no number. The API's limitation says why.
+  const tubeNotFound = analysis.measuredColor?.roi?.mode === 'CENTER_FALLBACK';
+
+  // The measured colour is nowhere near any level on the chart, so naming
+  // the nearest one is meaningless. A blank tube matched the 1000 ppm level
+  // at 15.2 dE and the screen read "Extremely High" -- a false positive at
+  // the top of the scale from a sample containing none of the analyte.
+  //
+  // Mirrors MAX_PLAUSIBLE_DISTANCE in the vision service's matcher. The
+  // band is still shown, with its distance, because "closest, but not
+  // close" is useful; the ppm is not, so it is withheld.
+  const noLevelIsClose =
+    prediction.colorDistance !== null &&
+    prediction.colorDistance > MAX_PLAUSIBLE_DISTANCE;
+
+  const concentration = tubeNotFound || noLevelIsClose
+    ? null
+    : prediction.estimatedConcentration !== null && prediction.concentrationUnit
       ? { value: prediction.estimatedConcentration, unit: prediction.concentrationUnit }
       : prediction.referenceConcentration !== null && prediction.referenceUnit
         ? { value: prediction.referenceConcentration, unit: prediction.referenceUnit }

@@ -72,7 +72,20 @@ class MatchResult:
 # Above this CIEDE2000 distance, the nearest level is not a meaningful match —
 # the measured colour simply is not on this chart. Chosen as a conservative
 # engineering default, not a validated threshold.
-MAX_PLAUSIBLE_DISTANCE = 25.0
+# Beyond this, the measured colour is not on this chart and the "nearest"
+# level means nothing.
+#
+# This was 25.0, which is wider than the whole chart in places: the measured
+# standards sit a median of 7.7 dE2000 apart, and the widest adjacent gap is
+# 23. At 25 a blank tube matched the 1000 ppm level at dE 15 and the result
+# read "Extremely High" -- a false positive at the very top of the scale,
+# from a sample containing none of the analyte.
+#
+# 12 is set against the chart rather than by taste: it is above the largest
+# gap between the levels that actually crowd together (2.4 to 11) so an
+# ordinary reading still lands, and below the distance at which a colour is
+# simply somewhere else on the wheel.
+MAX_PLAUSIBLE_DISTANCE = 12.0
 
 # When the two nearest levels differ by less than this, the choice between
 # them is not supported by the measurement.

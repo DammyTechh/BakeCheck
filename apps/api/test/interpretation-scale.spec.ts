@@ -53,7 +53,7 @@ describe('the laboratory ppm interpretation scale', () => {
       expect(new Set(values).size).toBe(values.length);
     });
 
-    it('is exactly what the seeded reference chart is built from', () => {
+    it('contains every level the seeded chart carries, verbatim', () => {
       // The chart and the scale used to be two vocabularies, and reading one
       // against the other overstated results by ~25x. They are now one: a
       // chart level IS a point on this scale -- same ppm, same wording. This
@@ -68,9 +68,23 @@ describe('the laboratory ppm interpretation scale', () => {
         ),
       ) as { levels: Array<{ label: string; concentration_value: number }> };
 
-      expect(
-        seed.levels.map((l) => [l.concentration_value, l.label]),
-      ).toEqual(INTERPRETATION_SCALE.map((p) => [p.concentration, p.interpretation]));
+      // The chart is a SUBSET of the scale, not a copy of it: a level only
+      // exists where a prepared standard was photographed, and none was
+      // supplied at 450 ppm. Every level the chart DOES carry must match
+      // the scale exactly -- same concentration, same wording -- which is
+      // what stops the two vocabularies drifting apart again.
+      const scale = new Map(
+        INTERPRETATION_SCALE.map((p) => [p.concentration, p.interpretation]),
+      );
+      for (const level of seed.levels) {
+        expect(scale.get(level.concentration_value)).toBe(level.label);
+      }
+
+      // And the only thing allowed to be missing is a standard nobody shot.
+      const missing = [...scale.keys()].filter(
+        (ppm) => !seed.levels.some((l) => l.concentration_value === ppm),
+      );
+      expect(missing).toEqual([450]);
     });
 
     it('gives every chart level a colour, so every level can be matched', () => {

@@ -59,6 +59,13 @@ interface LevelRow {
  *  • `limitations` are assembled from the actual state of the method, chart
  *    and model and persisted with the result.
  */
+/**
+ * The smallest colour difference a person can reliably see, in CIEDE2000.
+ * Below this, naming one level over another is a distinction without a
+ * difference.
+ */
+const JUST_NOTICEABLE_DIFFERENCE = 2.3;
+
 @Injectable()
 export class AnalysesService {
   private readonly logger = new Logger(AnalysesService.name);
@@ -441,17 +448,73 @@ export class AnalysesService {
     }
 
     if (chart.validation_status === 'ILLUSTRATIVE') {
+      // Reworded on 13 November 2026. The colours ARE now measured from
+      // prepared standards of known concentration -- saying otherwise
+      // understated the chart and, worse, pointed at the wrong fix. What
+      // is still missing is controlled photography: the standards were
+      // shot at different times under different light with no grey card,
+      // so four steps came out non-monotonic and three adjacent pairs sit
+      // within dE2000 5 of each other.
       limitations.push(
-        `Reference chart "${chart.name}" is marked ILLUSTRATIVE: its colours ` +
-          'were read from a picture rather than measured from prepared ' +
-          'standards. It establishes no validated relationship between colour ' +
-          `and ${method.target_analyte} concentration.`,
+        `Reference chart "${chart.name}" is marked ILLUSTRATIVE. Its ` +
+          'colours are measured from prepared standards, but the standards ' +
+          'were photographed under uncontrolled lighting with no colour ' +
+          'reference in frame, so the colour-to-concentration relationship ' +
+          'it describes is not validated.',
       );
     } else if (chart.validation_status !== 'VALIDATED') {
       limitations.push(
         `Reference chart "${chart.name}" has validation status ` +
           `${chart.validation_status} and is not a validated reference.`,
       );
+    }
+
+    // The tube was never found. On 13 November 2026, run against fifteen
+    // photographs of prepared standards, the old detector fell through to
+    // this centre crop on six of them -- and on those photographs the
+    // centre of the frame is the white sheet held behind the tube. The
+    // pipeline measured paper and the screen reported a band for it.
+    //
+    // The detector now looks for the hue the chart says the assay
+    // produces, which finds the liquid in fourteen of the fifteen. When it
+    // still cannot, the honest output is no reading, not a confident one:
+    // a colour was measured, but not necessarily the sample's.
+    if (result.roi.mode === 'CENTER_FALLBACK') {
+      limitations.push(
+        'The tube could not be located in this photograph, so the colour ' +
+          'was taken from the middle of the frame. That may be background ' +
+          'rather than the solution, and no band should be read from it. ' +
+          'Retake the photograph with the tube filling more of the frame, ' +
+          'or draw the region by hand.',
+      );
+    }
+
+    // Sample-specific, and the one limitation that changes per photograph:
+    // when the two nearest levels are within a just-noticeable difference
+    // of each other, the match did not actually choose between them.
+    //
+    // This chart makes that likely in places. Measured from the prepared
+    // standards, 50 and 100 ppm sit dE2000 2.4 apart, 20 and 30 sit 3.6
+    // apart, 400 and 500 sit 4.8 apart. A reading in those regions names
+    // the nearer level by a margin smaller than the eye can see.
+    const matched = result.referenceMatch?.colorDistance;
+    const runnerUp = result.referenceMatch?.alternatives?.[0];
+    if (
+      matched !== undefined &&
+      matched !== null &&
+      runnerUp?.colorDistance !== undefined &&
+      runnerUp.colorDistance !== null
+    ) {
+      const margin = runnerUp.colorDistance - matched;
+      if (margin < JUST_NOTICEABLE_DIFFERENCE) {
+        limitations.push(
+          `The two nearest levels could not be separated for this sample: ` +
+            `"${result.referenceMatch?.label}" and "${runnerUp.label}" are ` +
+            `within ${margin.toFixed(1)} \u0394E of each other, below the ` +
+            `${JUST_NOTICEABLE_DIFFERENCE} \u0394E a person can distinguish. ` +
+            'Treat the result as spanning both.',
+        );
+      }
     }
 
     if (!result.model.validated) {

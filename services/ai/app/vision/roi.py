@@ -57,6 +57,7 @@ class Region:
 def detect_region(
     rgb: NDArray[np.uint8],
     manual: dict | None = None,
+    expected_hue: tuple[float, float] | None = None,
 ) -> Region:
     """Resolve the region to measure, trying each strategy in turn."""
     height, width = rgb.shape[:2]
@@ -71,9 +72,16 @@ def detect_region(
             confidence=1.0,
         ).clamp(width, height)
 
-    # Saturation first: it is the most reliable signal when the solution is
-    # coloured, which is the common case.
-    detected = _detect_tube(rgb)
+    # Hue first, when the reference chart tells us what colour to expect.
+    # This is the only strategy that reliably separates the liquid from
+    # hands, sleeves and gloves; see _detect_liquid_by_expected_hue.
+    detected = None
+    if expected_hue is not None:
+        detected = _detect_liquid_by_expected_hue(rgb, expected_hue[0], expected_hue[1])
+
+    # Saturation next: used when no chart hue is available.
+    if detected is None:
+        detected = _detect_tube(rgb)
 
     # A colourless solution (a 0 ppm blank) has almost no saturation, so the
     # first strategy cannot see it at all. Fall back to finding whatever
@@ -86,6 +94,100 @@ def detect_region(
         return detected.clamp(width, height)
 
     return _centre_fallback(width, height)
+
+
+def _detect_liquid_by_expected_hue(
+    rgb: NDArray[np.uint8],
+    hue_deg: float,
+    tolerance_deg: float,
+) -> Region | None:
+    """
+    Find the liquid by looking for the colour this assay actually produces.
+
+    The expected hue comes from the reference chart's own levels, so the
+    detector is looking for the thing the chart says a developed tube looks
+    like, rather than for "whatever is most saturated in the frame".
+
+    That distinction is the whole point of this function. The saturation-and-
+    Otsu strategy below was measured against fifteen photographs of prepared
+    standards on 13 November 2026 and found the liquid in NONE of them: it
+    picked the technician's hands, a yellow sleeve, a purple checked shirt,
+    or fell through to the centre crop, which on those photographs is the
+    white paper held behind the tube. The pipeline then measured paper and
+    reported a band for it.
+
+    Hue separates all of those cleanly. In CIELAB the bromate complex sits
+    near -70 degrees (blue); skin, cream gloves and a yellow sleeve are warm
+    and positive; paper, glass and benchtop are achromatic and excluded by
+    the chroma floor.
+    """
+    height, width = rgb.shape[:2]
+
+    lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB).astype(np.float64)
+    lightness = lab[..., 0] * 100.0 / 255.0
+    a_star = lab[..., 1] - 128.0
+    b_star = lab[..., 2] - 128.0
+
+    chroma = np.hypot(a_star, b_star)
+    angle = np.degrees(np.arctan2(b_star, a_star))
+    delta = np.abs(((angle - hue_deg + 180.0) % 360.0) - 180.0)
+
+    on_hue = delta <= tolerance_deg
+    # Two ways to be the liquid: ordinary chroma at the right hue, or very
+    # dark with only a trace of it. At the top of the scale the solution is
+    # almost black and its chroma has collapsed, so a single chroma floor
+    # would miss exactly the strongest samples.
+    mask = ((on_hue & (chroma >= 12.0)) | (on_hue & (lightness < 32.0) & (chroma >= 5.0)))
+    mask = mask.astype(np.uint8) * 255
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return None
+
+    best: tuple[float, Region] | None = None
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        if w * h < 400:
+            continue
+        # A liquid column is narrow relative to the frame and no wider than
+        # it is tall. A shirt sleeve fails both.
+        if not (0.02 * width <= w <= 0.20 * width):
+            continue
+        if h < w * 0.8:
+            continue
+        # Touching the frame edge means it runs out of shot: background,
+        # not a tube held up in front of one.
+        if x <= 1 or y <= 1 or x + w >= width - 1 or y + h >= height - 1:
+            continue
+
+        filled = float(cv2.contourArea(contour)) / float(w * h)
+        if filled < 0.5:
+            continue
+
+        # Prefer the biggest well-formed column, and let how convincingly
+        # it is on-hue carry into the confidence.
+        column = mask[y : y + h, x : x + w] > 0
+        strength = float(column.mean())
+        score = float(w * h) * strength
+
+        # Inset: away from the meniscus, the rounded base, and the bright
+        # rim where the glass catches the light.
+        region = Region(
+            x=x + int(w * 0.25),
+            y=y + int(h * 0.30),
+            width=max(int(w * 0.50), 1),
+            height=max(int(h * 0.45), 1),
+            mode=RoiMode.AUTO,
+            confidence=round(min(0.5 + 0.45 * strength * filled, 0.95), 3),
+        )
+        if best is None or score > best[0]:
+            best = (score, region)
+
+    return best[1] if best else None
 
 
 def _detect_tube(rgb: NDArray[np.uint8]) -> Region | None:

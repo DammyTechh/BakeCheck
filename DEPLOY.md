@@ -109,7 +109,7 @@ Vercel → **Add New** → **Project** → pick the same repository.
 
 | Setting | Value |
 |---|---|
-| **Root Directory** | `apps/web` ← this one matters most |
+| **Root Directory** | `Frontend` ← this one matters most |
 | Framework Preset | Vite (detected) |
 | Build / Output / Install | leave as detected — `vercel.json` sets them |
 
@@ -208,7 +208,7 @@ $env:API_PORT = "3100"
 Running the frontend against a local API:
 
 ```bash
-cd apps/web
+cd Frontend
 npm install
 npm run dev          # http://localhost:5173
 ```

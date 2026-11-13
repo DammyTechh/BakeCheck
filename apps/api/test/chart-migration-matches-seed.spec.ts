@@ -28,7 +28,7 @@ const SEED = resolve(
 );
 const MIGRATION = resolve(
   root,
-  'database/migrations/0008_reference_chart_laboratory_scale.sql',
+  'database/migrations/0009_reference_chart_measured_standards.sql',
 );
 
 interface SeedLevel {
@@ -60,11 +60,14 @@ const migrationLevels = (): Array<{
   }));
 };
 
-describe('migration 0008 and the seed describe the same chart', () => {
-  it('parses sixteen levels out of the migration', () => {
+describe('the latest chart migration and the seed describe the same chart', () => {
+  it('parses fifteen levels out of the migration', () => {
     // Guards the parsing above: a regex that silently matched nothing would
     // make every comparison below trivially pass.
-    expect(migrationLevels()).toHaveLength(16);
+    //
+    // Fifteen, not sixteen: no standard was photographed for 450 ppm, so
+    // the chart has no colour that could match it. See the 450 test below.
+    expect(migrationLevels()).toHaveLength(15);
   });
 
   it('agrees on every concentration, in order', () => {
@@ -85,7 +88,7 @@ describe('migration 0008 and the seed describe the same chart', () => {
     );
   });
 
-  it('is the laboratory scale, not something near it', () => {
+  it('is the laboratory scale, minus the one standard not photographed', () => {
     // Typed out independently of both files.
     expect(migrationLevels().map((l) => [l.concentration, l.label])).toEqual([
       [0, 'Negative'],
@@ -101,10 +104,21 @@ describe('migration 0008 and the seed describe the same chart', () => {
       [300, 'Heavy'],
       [350, 'Very Heavy'],
       [400, 'Severe'],
-      [450, 'Very Severe'],
       [500, 'Intense'],
       [1000, 'Extremely High'],
     ]);
+  });
+
+  it('omits 450 ppm rather than inventing a colour for it', () => {
+    // No standard was supplied at 450. Interpolating its neighbours would
+    // produce a level that looks measured and is not -- which is the exact
+    // thing this chart was rebuilt to stop doing.
+    expect(migrationLevels().some((l) => l.concentration === 450)).toBe(false);
+  });
+
+  it('still carries every colour it does have, in scale order', () => {
+    const values = migrationLevels().map((l) => l.concentration);
+    expect(values).toEqual([...values].sort((a, b) => a - b));
   });
 
   it('carries no concentration with a fractional part', () => {
@@ -119,7 +133,7 @@ describe('migration 0008 and the seed describe the same chart', () => {
     // that the DELETE was not dropped in a later edit.
     const sql = readFileSync(MIGRATION, 'utf8');
     expect(sql).toMatch(/DELETE FROM reference_levels/);
-    expect(sql).toMatch(/sort_order\s*>\s*15/);
+    expect(sql).toMatch(/sort_order\s*>\s*14/);
   });
 
   it('touches only the illustrative chart', () => {

@@ -18,10 +18,16 @@ import pytest
 
 from app.reference_matching.matcher import ReferenceLevel, match_reference
 
-# The laboratory's scale, 16 October 2026. Typed out here rather than read
-# from the seed, so a mistake in the seed shows up as a failure instead of
-# being quietly mirrored.
+# The laboratory's reporting scale, 16 October 2026. Typed out here rather
+# than read from the seed, so a mistake in the seed shows up as a failure
+# instead of being quietly mirrored.
 SCALE_PPM = [0, 10, 20, 30, 40, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 1000]
+
+# What the CHART carries, which is not the same thing. Each level needs a
+# photographed standard, and none was supplied for 450 ppm on 13 November
+# 2026. Interpolating a colour for it would produce a level that looks
+# measured and is not.
+CHART_PPM = [p for p in SCALE_PPM if p != 450]
 
 SEED = (
     pathlib.Path(__file__).resolve().parents[3]
@@ -49,9 +55,14 @@ def _levels() -> list[ReferenceLevel]:
 
 
 class TestTheSeededChart:
-    def test_carries_exactly_the_laboratory_scale(self) -> None:
+    def test_carries_every_standard_that_was_photographed(self) -> None:
         chart = json.loads(SEED.read_text())
-        assert [l["concentration_value"] for l in chart["levels"]] == SCALE_PPM
+        assert [l["concentration_value"] for l in chart["levels"]] == CHART_PPM
+
+    def test_omits_450_rather_than_inventing_a_colour_for_it(self) -> None:
+        chart = json.loads(SEED.read_text())
+        assert 450 not in [l["concentration_value"] for l in chart["levels"]]
+        assert 450 in SCALE_PPM          # the word still exists on the scale
 
     def test_every_concentration_is_a_whole_number(self) -> None:
         chart = json.loads(SEED.read_text())
@@ -66,13 +77,13 @@ class TestTheSeededChart:
 
 
 class TestEveryMatchLandsOnACategory:
-    @pytest.mark.parametrize("index", range(len(SCALE_PPM)))
+    @pytest.mark.parametrize("index", range(len(CHART_PPM)))
     def test_a_colour_taken_from_a_level_returns_that_level(self, index: int) -> None:
         levels = _levels()
         result = match_reference(levels[index].lab, levels)
 
         assert result is not None
-        assert result.concentration_value == SCALE_PPM[index]
+        assert result.concentration_value == CHART_PPM[index]
         assert float(result.concentration_value).is_integer()
 
     def test_a_colour_between_two_levels_still_returns_one_of_them(self) -> None:
@@ -84,7 +95,7 @@ class TestEveryMatchLandsOnACategory:
         result = match_reference(midpoint, levels)
 
         assert result is not None
-        assert result.concentration_value in (SCALE_PPM[8], SCALE_PPM[9])
+        assert result.concentration_value in (CHART_PPM[8], CHART_PPM[9])
         assert result.concentration_value not in range(201, 250)
 
     def test_a_colour_far_off_the_chart_still_returns_a_category(self) -> None:
@@ -94,7 +105,7 @@ class TestEveryMatchLandsOnACategory:
         result = match_reference(np.array([53.2, 80.1, 67.2]), levels)
 
         assert result is not None
-        assert result.concentration_value in SCALE_PPM
+        assert result.concentration_value in CHART_PPM
         assert result.color_distance > 5
 
     @pytest.mark.parametrize(
@@ -112,7 +123,7 @@ class TestEveryMatchLandsOnACategory:
         result = match_reference(lab, levels)
 
         assert result is not None
-        assert result.concentration_value in SCALE_PPM
+        assert result.concentration_value in CHART_PPM
         assert float(result.concentration_value).is_integer()
 
 

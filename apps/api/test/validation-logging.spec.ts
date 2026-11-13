@@ -116,7 +116,11 @@ describe('what a rejected request writes to the log', () => {
   it('adds no details key when there is nothing to add', () => {
     const { host: h } = host();
     filter(true).catch(
-      new ApiError(ErrorCode.ALREADY_EXISTS, 'Sample code already used'),
+      new ApiError(
+        ErrorCode.ALREADY_EXISTS,
+        'Sample code already used',
+        HttpStatus.CONFLICT,
+      ),
       h,
     );
 

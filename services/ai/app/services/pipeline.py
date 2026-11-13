@@ -21,6 +21,8 @@ service is built to avoid.
 """
 from __future__ import annotations
 
+import math
+
 import base64
 import binascii
 import logging
@@ -57,6 +59,48 @@ from ..vision.validation import ImageValidationError, decode_image
 logger = logging.getLogger(__name__)
 
 
+def _expected_hue_from_chart(levels) -> tuple[float, float] | None:
+    """
+    The hue the developed solution should be, taken from the chart itself.
+
+    Returned as (centre, tolerance) in CIELAB degrees, so the region
+    detector can look for the colour this assay actually produces instead of
+    for whatever happens to be the most saturated thing in the photograph.
+
+    Derived rather than hardcoded: a chart for a different analyte would
+    hand back its own hue without a code change. Achromatic levels -- the
+    0 ppm blank especially -- are excluded, because they have no hue to
+    contribute and averaging them in would drag the centre toward nothing.
+
+    None when the chart has too few chromatic levels to be worth trusting;
+    the detector then falls back to its older strategies.
+    """
+    angles = []
+    for level in levels:
+        a = float(level.lab_a)
+        b = float(level.lab_b)
+        if math.hypot(a, b) < 15.0:
+            continue
+        angles.append(math.degrees(math.atan2(b, a)))
+    if len(angles) < 3:
+        return None
+
+    # Circular mean: hue wraps, so averaging the numbers directly would put
+    # the centre on the opposite side of the wheel for a hue near 180.
+    mean_x = sum(math.cos(math.radians(t)) for t in angles) / len(angles)
+    mean_y = sum(math.sin(math.radians(t)) for t in angles) / len(angles)
+    centre = math.degrees(math.atan2(mean_y, mean_x))
+
+    spread = max(
+        abs(((t - centre + 180.0) % 360.0) - 180.0) for t in angles
+    )
+    # Room for the spread the chart already shows, plus the variation
+    # between one photograph and the next. Capped so the window cannot
+    # widen until it admits skin tones on the far side of the wheel.
+    return centre, min(max(spread * 1.5, 25.0), 60.0)
+
+
+
 class AnalysisPipeline:
     def __init__(self, registry: ModelRegistry, settings: Settings) -> None:
         self.registry = registry
@@ -86,7 +130,8 @@ class AnalysisPipeline:
 
         # ── Stage 2: region of interest ──────────────────────────────────────
         manual_roi = request.roi.model_dump() if request.roi else None
-        region = detect_region(decoded.rgb, manual_roi)
+        expected_hue = _expected_hue_from_chart(request.reference_levels)
+        region = detect_region(decoded.rgb, manual_roi, expected_hue)
         region_pixels = region.extract(decoded.rgb)
 
         if region_pixels.size == 0:

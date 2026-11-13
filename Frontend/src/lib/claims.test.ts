@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AMBIGUOUS_DELTA_E, analysisClaim } from './claims';
+import { AMBIGUOUS_DELTA_E, MAX_PLAUSIBLE_DISTANCE, analysisClaim } from './claims';
 import type { Analysis } from './types';
 import real from './__fixtures__/analysis-screening.json';
 
@@ -305,5 +305,66 @@ describe('limitations', () => {
     for (const a of cases) {
       expect(analysisClaim(a).qualifier.length).toBeGreaterThan(20);
     }
+  });
+});
+
+describe('when a reading must be withheld', () => {
+  it('shows no ppm when the tube could not be located', () => {
+    // CENTER_FALLBACK means the middle of the frame was measured. On the
+    // laboratory's own photographs that is the sheet of paper held behind
+    // the tube, so a number here would be a reading of the background.
+    const base = analysis();
+    const claim = analysisClaim({
+      ...base,
+      measuredColor: {
+        ...base.measuredColor!,
+        roi: { x: 0, y: 0, width: 10, height: 10, mode: 'CENTER_FALLBACK' },
+      },
+    });
+    expect(claim.concentration).toBeNull();
+  });
+
+  it('shows a ppm when the tube was located normally', () => {
+    const base = analysis();
+    const claim = analysisClaim({
+      ...base,
+      measuredColor: {
+        ...base.measuredColor!,
+        roi: { x: 0, y: 0, width: 10, height: 10, mode: 'AUTO_TUBE_DETECTION' },
+      },
+    });
+    expect(claim.concentration).not.toBeNull();
+  });
+
+  it('shows no ppm when nothing on the chart is close', () => {
+    // The case that produced "Extremely High" for a blank tube: nearest
+    // level 15.2 dE away, which is further apart than most of the chart's
+    // own levels are from each other.
+    const base = analysis();
+    const claim = analysisClaim({
+      ...base,
+      prediction: { ...base.prediction, colorDistance: 15.2 },
+    });
+    expect(claim.concentration).toBeNull();
+  });
+
+  it('still shows the nearest band and its distance', () => {
+    // "Closest, but not close" is worth seeing; it is the number that is
+    // not supported, not the comparison.
+    const base = analysis();
+    const claim = analysisClaim({
+      ...base,
+      prediction: { ...base.prediction, colorDistance: 15.2 },
+    });
+    expect(claim.headline).toBeTruthy();
+    expect(claim.distance).toBe(15.2);
+  });
+
+  it('keeps the threshold equal to the vision service', () => {
+    // MAX_PLAUSIBLE_DISTANCE is defined in both this module and
+    // services/ai/app/reference_matching/matcher.py. If one moves and the
+    // other does not, the screen and the stored note disagree about
+    // whether a result was reportable.
+    expect(MAX_PLAUSIBLE_DISTANCE).toBe(12.0);
   });
 });

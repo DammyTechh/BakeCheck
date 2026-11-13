@@ -298,13 +298,19 @@ async function main(): Promise<void> {
            color_source, validation_status, notes
          )
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
-                 'MANUAL_ENTRY','ILLUSTRATIVE',$17)
+                 'IMAGE_SAMPLED','ILLUSTRATIVE',$17)
          ON CONFLICT (reference_chart_id, sort_order) DO UPDATE
            SET label = EXCLUDED.label,
                concentration_value = EXCLUDED.concentration_value,
                rgb_r = EXCLUDED.rgb_r, rgb_g = EXCLUDED.rgb_g, rgb_b = EXCLUDED.rgb_b,
                lab_l = EXCLUDED.lab_l, lab_a = EXCLUDED.lab_a, lab_b = EXCLUDED.lab_b,
-               lab_std = EXCLUDED.lab_std`,
+               lab_std = EXCLUDED.lab_std,
+               -- Must be updated too. Without it a row written by an
+               -- earlier run keeps its old provenance for ever, which is
+               -- how the measured colours ended up still labelled
+               -- MANUAL_ENTRY after the chart was rebuilt from standards.
+               color_source = EXCLUDED.color_source,
+               notes = EXCLUDED.notes`,
         [
           chartId,
           level.label,
@@ -318,6 +324,9 @@ async function main(): Promise<void> {
           level.lab[1],
           level.lab[2],
           level.lab_std,
+          // IMAGE_SAMPLED since 13 November 2026: every colour is measured
+          // from a photograph of a prepared standard. It was MANUAL_ENTRY
+          // while the colours were interpolated from an illustration.
           level.roi?.x ?? null,
           level.roi?.y ?? null,
           level.roi?.width ?? null,

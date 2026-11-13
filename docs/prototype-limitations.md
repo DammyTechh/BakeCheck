@@ -60,46 +60,77 @@ levels, so the screen said "Very High Level" for a tube the chart numbered at
 10 ppm, and anyone reading that against the scale would infer 250. A 25x
 overstatement assembled from two artefacts that were each labelled correctly.
 
-## 1b. The concentrations are the laboratory's. The colours are not.
+## 1b. The colours are now measured. The photography is not controlled.
 
-This is the live limitation, and the only one that matters for how a result
-should be read.
+On 13 November 2026 the laboratory photographed fifteen prepared standards of
+known concentration, and the chart is rebuilt from them. Every colour is now
+measured from a real tube at a real concentration — the thing the chart had
+been missing since it was built.
 
-- **The sixteen ppm values and their wording** are the laboratory's own,
-  recorded verbatim.
-- **The colour of each level is not measured.** No prepared standard has been
-  photographed. The six colours sampled from the chart illustration were
-  interpolated across the sixteen levels in CIELAB and spread by ladder
-  position -- the ppm steps are uneven (10 apart at the bottom, 500 at the
-  top) and no relationship between colour and concentration has been
-  established, so an even visual ramp is the only defensible placeholder.
+It is still `ILLUSTRATIVE`, and the reason is the photography:
 
-So a reading of "350 ppm, Very Heavy" means: *the measured colour was nearest
-to the level printed 350 ppm on an illustrative ladder.* It is not a
-measurement of bromate. The chart is marked `ILLUSTRATIVE`, the method
-`DRAFT`, and the result screen says "Screening reading from an unvalidated
-chart" above every number.
+- the fifteen shots were taken at different times, by different hands, under
+  different light, with **no grey card or colour reference in any frame**;
+- each was white balanced against the sheet of paper behind the tube, which
+  is a partial correction and not a calibration.
 
-**What would fix it, concretely:** photograph the sixteen prepared standards
-under controlled lighting with a colour reference in frame, run
-`infrastructure/scripts/extract_reference_colors.py` over the photograph, and
-mark the chart `VALIDATED`. Nothing else in the pipeline has to change -- the
-matcher, the ladder and the reading already work off whatever colours the
-chart carries.
+That is measurable, and is left visible rather than smoothed away:
 
-**Why the ppm is shown at all**, given the above: the chart now carries the
-laboratory's own values, so the matched level *has* a number. Hiding it left a
-technician with a colour name and no reading, which is not what a colour chart
-is for. What the number means is carried by the qualifier and the chart's
-status, not by suppressing the number.
+- **four steps are non-monotonic** — 200, 250, 350 and 500 ppm each
+  photographed *lighter* than the level below them;
+- **three adjacent pairs sit within ΔE2000 5**, close to indistinguishable:
+  20/30 (3.6), 50/100 (2.4), 400/500 (4.8).
 
-### Values between two points
+Both track the shooting conditions, not the dilution series.
 
-The laboratory gave discrete points, not ranges, and did not say how to word
-15 ppm. A value between two points takes the **highest point it reaches**, so
-249 ppm reads as "High" and never rounds up into "Very High".
-`bracketRuleConfirmedByLaboratory` is `false`: that rule is ours until the
-laboratory confirms it.
+**450 ppm is not on the chart.** No standard was supplied for it. The scale
+still defines "Very Severe" for a measured 450 ppm, but no colour can match
+it, and interpolating its neighbours would produce a level that looks
+measured and is not.
+
+**To make this `VALIDATED`:** re-photograph all sixteen standards in one
+session, one camera, fixed lighting, grey card in every frame.
+
+---
+
+## 1c. What the system refuses to report, and why
+
+Running all fifteen standards back through the live pipeline is the only
+honest test of the chart, and the first run failed badly: **1 of 10 correct**,
+with a blank 0 ppm tube reported as "Extremely High".
+
+The cause was not the chart. The region detector thresholded on *saturation*,
+and in these photographs the most saturated things are the technician's
+hands, a yellow sleeve and a purple checked shirt. It found the liquid in
+**none** of them — it either grabbed one of those or fell through to a centre
+crop, which on these photographs is the white paper behind the tube. The
+pipeline measured paper and the screen reported a band for it.
+
+Three changes:
+
+1. **The detector looks for the hue the chart says the assay produces**,
+   derived from the chart's own levels rather than hardcoded, so a chart for
+   a different analyte brings its own. It now finds the liquid in 14 of 15.
+2. **No tube found, no reading.** A `CENTER_FALLBACK` region means the
+   middle of the frame was measured, which may be background. The band and
+   its distance are shown; the ppm is withheld.
+3. **No close level, no reading.** `MAX_PLAUSIBLE_DISTANCE` was 25 ΔE —
+   wider than most of the chart. A blank matched 1000 ppm at 15.2 ΔE and read
+   "Extremely High". It is now 12, above the gaps between levels that
+   genuinely crowd together and below the distance at which a colour is
+   simply somewhere else.
+
+After those changes, across all fifteen standards:
+
+| | |
+|---|---|
+| exact level | 9 |
+| adjacent level | 4 |
+| correctly withheld | 2 (0 ppm at ΔE 15.2, 500 ppm at ΔE 23.0) |
+| **wrong and confident** | **0** |
+
+The four adjacent misses are in the regions the chart itself cannot separate
+(§1b). A reading there carries a limitation naming both levels.
 
 ---
 
